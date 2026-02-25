@@ -1,66 +1,97 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Taller Mecánico
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistema de gestión para un taller mecánico: clientes, vehículos, órdenes de trabajo,
+servicios, repuestos e inventarios. Proyecto construido con PHP (Laravel) y Vite.
 
-## About Laravel
+## Características principales
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- Gestión de clientes y vehículos.
+- Creación y seguimiento de órdenes de trabajo (Work Orders).
+- Registro de servicios y repuestos por orden.
+- Control de movimientos de inventario.
+- Autenticación de usuarios y roles básicos.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Requisitos
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP 8.1+ con extensiones comunes
+- Composer
+- Node.js 16+ y npm
+- MySQL / MariaDB (o otra base de datos soportada por Laravel)
+- Git
 
-## Learning Laravel
+## Instalación rápida (desarrollo)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+1. Clona el repositorio:
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+```bash
+git clone <repo-url> taller-mecanico
+cd taller-mecanico
+```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+2. Instala dependencias PHP y JavaScript:
 
-## Laravel Sponsors
+```bash
+composer install
+npm install
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+3. Copia el archivo de entorno y genera la clave de la aplicación:
 
-### Premium Partners
+```bash
+copy .env.example .env    # Windows
+php artisan key:generate
+```
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+4. Configura la conexión a la base de datos en `.env` (DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD).
 
-## Contributing
+5. Ejecuta migraciones y seeders (si aplica):
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+php artisan migrate --seed
+```
 
-## Code of Conduct
+6. Inicia el servidor de desarrollo y el watcher de assets (Vite):
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+npm run dev       # Vite (assets)
+php artisan serve  # servidor Laravel (http://127.0.0.1:8000)
+```
 
-## Security Vulnerabilities
+> Nota: en este workspace el task de Vite (`npm run dev`) puede ya estar corriendo.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Ejecutar pruebas
 
-## License
+```bash
+php artisan test
+# o
+vendor\bin\phpunit
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Estructura relevante del proyecto
+
+- `app/` — lógica de la aplicación, modelos y controladores.
+- `resources/views/` — vistas Blade.
+- `resources/js/` y `resources/css/` — assets front-end, integrados con Vite.
+- `database/migrations/` — migraciones de base de datos.
+- `routes/web.php` — rutas web principales.
+
+## Uso básico
+
+- Accede al panel en `http://127.0.0.1:8000` después de arrancar el servidor.
+- Registra o usa datos de seeders para probar flujos (clientes, vehículos, órdenes).
+
+## Contribuir
+
+1. Crea una rama feature: `git checkout -b feature/nombre-descriptivo`
+2. Haz commits claros y atómicos.
+3. Abre un pull request describiendo los cambios.
+
+Por favor abre issues para bug reports o solicitudes de features.
+
+## Licencia
+
+Licencia: MIT (ajustar según corresponda)
+
+## Créditos
+
+Proyecto inicial y scaffolding basado en Laravel + Vite. Mantén este archivo actualizado con instrucciones específicas del despliegue en producción si se requiere.
