@@ -11,8 +11,19 @@ export default {
 
     theme: {
         extend: {
+            colors: {
+                base: '#0F1117',
+                card: '#1A1D27',
+                hover: '#21253A',
+                border: '#2D3148',
+                accent:{
+                    DEFAULT: '#F97316',
+                    dim: 'rgba(249,115,22,0.12)',
+                },
+            },
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                rajdhani: ['Rajdhani', 'sans-serif'],
+                dm: ['DM Sans', 'sans-serif'],
             },
         },
     },
