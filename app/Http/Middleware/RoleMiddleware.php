@@ -13,9 +13,9 @@ class RoleMiddleware
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next, string ...$roles): Response
     {
-        if (! auth()->check() || ! inarray(auth()->user()->role, $roles)) {
+        if (! auth()->check() || ! in_array(auth()->user()->role, $roles)) {
             abort(403, 'No tienes permisos para acceder a esta sección.');
         }
 
