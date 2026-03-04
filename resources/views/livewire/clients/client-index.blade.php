@@ -71,8 +71,7 @@
                                     <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
                                 </svg>
                             </button>
-                            <button wire:click="deleteClient({{ $client->id }})"
-                                wire:click="$dispatch('confirmDelete', { event: 'deleteClient', params: {{ $client->id }}, title: '¿Eliminar cliente?', message: 'Esta acción eliminará al cliente permanentemente.' })"
+                            <button wire:click="openDeleteModal({{ $client->id }})"
                                 class="flex items-center justify-center w-8 h-8 text-red-400 transition-colors rounded-lg bg-red-500/10 hover:bg-red-500/20">
                                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                     stroke-width="2">
@@ -85,6 +84,7 @@
                         </div>
                     </td>
                 </tr>
+
                 @empty
                 <tr>
                     <td colspan="6" class="px-5 py-12 text-sm text-center text-gray-500">
