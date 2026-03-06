@@ -179,7 +179,6 @@
         </div>
 
     </div>
-    <livewire:shared.confirm-modal />
 </body>
 
 </html>

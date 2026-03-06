@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Clients;
 
-use App\Livewire\Shared\ConfirmModal;
+use App\Models\Client;
 use App\Services\ClientService;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -10,6 +10,10 @@ use Livewire\WithPagination;
 class ClientIndex extends Component
 {
     use WithPagination;
+
+    public bool $showConfirmModal = false;
+
+    public ?int $deleteId = null;
 
     public string $search = '';
 
@@ -21,6 +25,21 @@ class ClientIndex extends Component
         'deleteClient' => 'deleteClient',
     ];
 
+    public function deleteClient(): void
+    {
+        $client = Client::findOrFail($this->deleteId);
+        (new ClientService)->delete($client);
+        $this->showConfirmModal = false;
+        $this->deleteId = null;
+        $this->dispatch('notify', message: 'Cliente eliminado correctamente');
+    }
+
+    public function cancelDelete(): void
+    {
+        $this->showConfirmModal = false;
+        $this->deleteId = null;
+    }
+
     public function updatingSearch(): void
     {
         $this->resetPage();
@@ -28,12 +47,8 @@ class ClientIndex extends Component
 
     public function openDeleteModal(int $id): void
     {
-        $this->dispatch('confirmDelete',
-            event: 'deleteClient',
-            params: $id,
-            title: '¿Eliminar cliente?',
-            message: 'Esta acción eliminará al cliente permanentemente.',
-        )->to(ConfirmModal::class);
+        $this->deleteId = $id;
+        $this->showConfirmModal = true;
     }
 
     public function render()
