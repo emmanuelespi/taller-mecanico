@@ -179,6 +179,7 @@
         </div>
 
     </div>
+    <livewire:shared.toast />
 </body>
 
 </html>

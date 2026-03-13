@@ -105,4 +105,6 @@
     <x-confirm-modal :show="$showConfirmModal" title="¿Eliminar cliente?"
         message="Esta acción eliminará al cliente permanentemente." confirm-action="deleteClient"
         cancel-action="cancelDelete" />
+
+    <livewire:clients.client-form />
 </div>

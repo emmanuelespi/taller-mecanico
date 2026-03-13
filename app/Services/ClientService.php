@@ -27,7 +27,7 @@ class ClientService
 
     public function update(Client $client, array $data): Client
     {
-        $client->update($date);
+        $client->update($data);
 
         return $client;
     }
