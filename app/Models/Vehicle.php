@@ -29,4 +29,11 @@ class Vehicle extends Model
     {
         return $this->hasMany(WorkOrder::class);
     }
+
+    public function hasActiveWorkOrder(): bool
+    {
+        return $this->workOrders()
+            ->whereIn('status', ['pending', 'in_progress'])
+            ->exists();
+    }
 }

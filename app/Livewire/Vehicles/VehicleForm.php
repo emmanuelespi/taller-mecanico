@@ -2,6 +2,9 @@
 
 namespace App\Livewire\Vehicles;
 
+use App\Models\Client;
+use App\Models\Vehicle;
+use App\Services\VehicleService;
 use Livewire\Component;
 
 class VehicleForm extends Component
@@ -10,7 +13,7 @@ class VehicleForm extends Component
 
     public ?int $vehicleId = null;
 
-    public ?int $clientId = null;
+    public string $client_id = '';
 
     public string $plate = '';
 
@@ -25,8 +28,8 @@ class VehicleForm extends Component
     protected function rules(): array
     {
         return [
-            'client_id' => 'required|exists:clients,id',
-            'plate' => 'required|string|max:20|unique:vehicles,plate,'.($this->vehicleId ?? 'NULL'),
+            'client_id' => 'required|integer|exists:clients,id',
+            'plate' => 'required|string|max:20|unique:vehicles,plate, ' .($this->vehicleId ?? 'NULL'). ',id',
             'brand' => 'required|string|max:100',
             'model' => 'required|string|max:100',
             'year' => 'required|integer|min:1900|max:'.(date('Y') + 1),
@@ -50,11 +53,11 @@ class VehicleForm extends Component
 
         if ($vehicleId) {
             $vehicle = Vehicle::findOrFail($vehicleId);
-            $this->client_id = $vehicle->client_id;
+            $this->client_id = (string) $vehicle->client_id;
             $this->plate = $vehicle->plate;
             $this->brand = $vehicle->brand;
             $this->model = $vehicle->model;
-            $this->year = $vehicle->year;
+            $this->year = (string) $vehicle->year;
             $this->color = $vehicle->color;
         }
 
@@ -66,7 +69,7 @@ class VehicleForm extends Component
         $this->validate();
 
         $data = [
-            'client_id' => $this->client_id,
+            'client_id' => (int) $this->client_id,
             'plate' => strtoupper($this->plate),
             'brand' => $this->brand,
             'model' => $this->model,
@@ -99,6 +102,8 @@ class VehicleForm extends Component
 
     public function render()
     {
-        return view('livewire.vehicles.vehicle-form');
+        return view('livewire.vehicles.vehicle-form', [
+            'clients' => Client::orderBy('name')->get(),
+        ]);
     }
 }

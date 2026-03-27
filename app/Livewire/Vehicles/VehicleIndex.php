@@ -20,10 +20,15 @@ class VehicleIndex extends Component
     protected $queryString = ['search'];
 
     protected $listeners = [
-        'vehicleSalved' => '$refresh',
+        'vehicleSaved' => 'refreshVehicles',
     ];
 
     public function updatingSearch(): void
+    {
+        $this->resetPage();
+    }
+
+    public function refreshVehicle(): void
     {
         $this->resetPage();
     }
@@ -36,11 +41,22 @@ class VehicleIndex extends Component
 
     public function deleteVehicle(): void
     {
-        $vehicle = Vehicle::findOrFail($this->deleteId);
-        (new VehicleService)->delete($vehicle);
-        $this->showConfirmModal = false;
-        $this->deleteId = null;
-        $this->dispatch('notify', message: 'Vehiculo eliminado correctamente');
+        try {
+            $vehicle = Vehicle::findOrFail($this->deleteId);
+            (new VehicleService)->delete($vehicle);
+            $this->showConfirmModal = false;
+            $this->deleteId = null;
+
+            $vehicles = (new VehicleService)->getAll($this->search);
+            if($vehicles->isEmpty() && $this->page > 1){
+                $this->resetPage();
+
+            }
+
+            $this->dispatch('notify', message: 'Vehículo eliminado correctamente.');
+        } catch (\Throwable $th) {
+            $this->dispatch('notify', message: 'Error al eliminar'. $e->getMessage(), type: 'error');
+        }
     }
 
     public function cancelDelete(): void
