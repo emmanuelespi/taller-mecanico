@@ -13,11 +13,14 @@ class ServiceManager
         $query = Service::query();
 
         if ($onlyActive) {
-            $query->active();
+            $query->active('active', true);
         }
 
         if ($search) {
-            $query->search($search);
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}")
+                    ->orWhere('description', 'like', "%{$search}");
+            });
         }
 
         return $query->orderBy('name')
