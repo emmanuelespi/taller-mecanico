@@ -13,35 +13,42 @@ class ServiceManager
         $query = Service::query();
 
         if ($onlyActive) {
-            $query->active('active', true);
+            $query->where('active', true);
         }
 
         if ($search) {
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}")
-                    ->orWhere('description', 'like', "%{$search}");
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
             });
         }
-
-        return $query->orderBy('name')
-            ->paginate(10);
     }
 
     public function getActiveServices(): Collection
     {
-        return Service::active()
+        return Service::where('active', true)
             ->orderBy('name')
             ->get();
     }
 
     public function create(array $data): Service
     {
-        return Service::create($array);
+        return Service::create([
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
+            'price' => $data['price'],
+            'active' => $data['active'] ?? true,
+        ]);
     }
 
     public function update(Service $service, array $data): Service
     {
-        $service->update($data);
+        $service->update([
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
+            'price' => $data['price'],
+            'active' => $data['active'] ?? $service->active,
+        ]);
 
         return $service;
     }
@@ -49,7 +56,7 @@ class ServiceManager
     public function delete(Service $service): void
     {
         if ($service->workOrders()->exists()) {
-            throw new \Exception('No se puede eliminar un servicio que está siendo usado en órdenes de trabajo');
+            throw new \Exception('No se puede eliminar un servicio que está siendo usado en órdenes de trabajo.');
         }
 
         $service->delete();
@@ -61,5 +68,34 @@ class ServiceManager
         $service->save();
 
         return $service;
+    }
+
+    public function findById(int $id): ?Service
+    {
+        return Service::find($id);
+    }
+
+    public function findByWithTrashed(int $id): ?Service
+    {
+        return Service::withTrashed()->find($id);
+    }
+
+    public function restore(int $id): Service
+    {
+        $service = Service::withTrashed()->findOrFail($id);
+        $service->restore();
+
+        return $service;
+    }
+
+    public function forceDelete(int $id): void
+    {
+        $service = Service::withTrashed()->findOrFail($id);
+
+        if ($service->workOrders()->exists()) {
+            throw new \Exception('No se puede eliminar permanentemente un servicio con órdenes asociadas.');
+        }
+
+        $service->forceDelete();
     }
 }

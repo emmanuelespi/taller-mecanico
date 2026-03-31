@@ -8,19 +8,23 @@ use Livewire\Component;
 
 class ServiceForm extends Component
 {
-    public bool $open = false;
+    public $open = false;
 
-    public ?int $serviceId = null;
+    public $serviceId = null;
 
-    public string $name = '';
+    public $name = '';
 
-    public string $description = '';
+    public $description = '';
 
-    public string $price = '';
+    public $price = '';
 
-    public bool $active = true;
+    public $active = true;
 
-    protected function rules(): array
+    protected $listeners = [
+        'openModal' => 'openModal',
+    ];
+
+    protected function rules()
     {
         return [
             'name' => 'required|string|max:255|unique:services,name,'.($this->serviceId ?? 'NULL'),
@@ -30,10 +34,18 @@ class ServiceForm extends Component
         ];
     }
 
-    public function open(?int $serviceId = null): void
+    protected $message = [
+        'name.required' => 'El nombre del servicio es obligatoria.',
+        'name.unique' => 'Ya existe un servicio con este nombre.',
+        'price.required' => 'El precio es obligatorio.',
+        'price.numeric' => 'El precio debe ser un número válido.',
+        'price.min' => 'El precio no puede ser negativo.',
+    ];
+
+    public function openModal($serviceId = null)
     {
-        $this->restValidation();
-        $this->reset();
+        $this->resetValidation();
+        $this->reset(['name', 'description', 'price', 'active', 'serviceId']);
 
         $this->serviceId = $serviceId;
 
@@ -48,38 +60,38 @@ class ServiceForm extends Component
         $this->open = true;
     }
 
-    public function save(): void
+    public function save()
     {
         $this->validate();
 
         $data = [
             'name' => $this->name,
             'description' => $this->description,
-            'price' => (string) $this->price,
+            'price' => (float) $this->price,
             'active' => $this->active,
         ];
 
-        $serviceManager = new ServiceManager;
+        $manager = new ServiceManager;
 
         if ($this->serviceId) {
             $service = Service::findOrFail($this->serviceId);
-            $serviceManager->update($service, $data);
+            $manager->update($service, $data);
             $message = 'Servicio actualizado correctamente.';
         } else {
-            $serviceManager->create($data);
-            $message = 'Servicio creado correctamente.';
+            $manager->create($data);
+            $message = 'Servicio creado correctamente';
         }
 
         $this->open = false;
-        $this->reset();
+        $this->reset(['name', 'description', 'price', 'active', 'serviceId']);
         $this->dispatch('serviceSaved')->to(ServiceIndex::class);
         $this->dispatch('notify', message: $message);
     }
 
-    public function close(): void
+    public function close()
     {
         $this->open = false;
-        $this->reset();
+        $this->reset(['name', 'description', 'price', 'active', 'serviceId']);
     }
 
     public function render()
