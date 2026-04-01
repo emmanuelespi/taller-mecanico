@@ -56,7 +56,7 @@ class ServiceIndex extends Component
     {
         try {
             $service = Service::findOrFail($this->deleteId);
-            $manager = new ServiceManager();
+            $manager = new ServiceManager;
             $manager->delete($service);
 
             $this->showConfirmModal = false;
@@ -71,12 +71,14 @@ class ServiceIndex extends Component
     public function toggleActive($id)
     {
         try {
-            $service = Service::findOfFail($id);
-            $manager = new ServiceManager();
+            $service = Service::findOrFail($id);
+            $manager = new ServiceManager;
             $manager->toggleActive($service);
 
             $status = $service->active ? 'activado' : 'desactivado';
             $this->dispatch('notify', message: "Servicio {$status} correctamente");
+
+            $this->resetPage();
         } catch (\Exception $e) {
             $this->dispatch('notify', message: $e->getMessage(), type: 'error');
         }
@@ -85,7 +87,7 @@ class ServiceIndex extends Component
 
     public function render()
     {
-        $manager = new ServiceManager();
+        $manager = new ServiceManager;
         $services = $manager->getAll($this->search, $this->showOnlyActive);
 
         return view('livewire.services.service-index', [

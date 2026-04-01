@@ -22,6 +22,8 @@ class ServiceManager
                     ->orWhere('description', 'like', "%{$search}%");
             });
         }
+
+        return $query->orderBy('name', 'asc')->paginate(10);
     }
 
     public function getActiveServices(): Collection
