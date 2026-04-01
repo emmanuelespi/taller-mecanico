@@ -78,4 +78,18 @@ class User extends Authenticatable
     {
         return $this->role === 'recepcionista';
     }
+
+    public static function getRoles(): array
+    {
+        return [
+            'admin' => 'Administrador',
+            'recepcionista' => 'Recepcionista',
+            'mecanico' => 'Mecánico',
+        ];
+    }
+
+    public function getRoleName(): string
+    {
+        return self::getRoles()[$this->role] ?? $this->role;
+    }
 }
