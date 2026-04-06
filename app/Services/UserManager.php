@@ -8,12 +8,18 @@ use Illuminate\Support\Facades\Hash;
 
 class UserManager
 {
-    public function getAll(string $search = '', string $role = ''): LengthAwarePaginator
+    public function getAll(string $search = '', string $role = '', string $status = 'all'): LengthAwarePaginator
     {
         $query = User::query();
 
         if ($role && $role !== 'all') {
             $query->where('role', $role);
+        }
+
+        if ($status === 'active') {
+            $query->where('is_active', true);
+        } elseif ($status === 'inactive') {
+            $query->where('is_active', false);
         }
 
         if ($search) {
@@ -68,19 +74,23 @@ class UserManager
 
     public function toggleActive(User $user): User
     {
-        if ($user->trashed()) {
-            $user->restore();
-        } else {
-            if ($user->isAdmin() && User::where('role', 'admin')->count() <= 1) {
-                throw new \Exception('No se puede desactivar el último administrador del sistema.');
-            }
-
-            if (auth()->id() === $user->id) {
-                throw new \Exception('No se puede desactivar tu propio usuario.');
-            }
-
-            $user->delete();
+        if ($user->isAdmin() && $user::where('role', 'admin')->where('is_active', true)->count() <= 1 && $user->is_active) {
+            throw new \Exception('No se puede desactivar el último administrador activo del sistema');
         }
+
+        if (auth()->id() === $user->id && $user->is_active) {
+            throw new \Exception('No se puede desactivar tu propio usuario.');
+        }
+        $user->is_active = $user->is_active;
+        $user->save();
+
+        return $user;
+    }
+
+    public function restore(int $userId): User
+    {
+        $user = User::withTrashed()->findOrFail($userId);
+        $user->restore();
 
         return $user;
     }

@@ -20,7 +20,7 @@ class UserForm extends Component
 
     public $password_confirmation = '';
 
-    public $role = 'receptionista';
+    public $role = 'recepcionista';
 
     protected $listeners = [
         'openUserModal' => 'openModal',
@@ -34,7 +34,7 @@ class UserForm extends Component
             'role' => 'required|in:admin,recepcionista,mecanico',
         ];
 
-        if (! this->userId) {
+        if (! $this->userId) {
             $rules['password'] = 'required|min:6|confirmed';
         } else {
             $rules['password'] = 'nullable|min:6|confirmed';
@@ -55,14 +55,14 @@ class UserForm extends Component
         'role.in' => 'El rol seleccionado no es válido.',
     ];
 
-    public function openModal($user = null)
+    public function openModal($userId = null)
     {
         $this->resetValidation();
         $this->reset(['name', 'email', 'password', 'password_confirmation', 'role', 'userId']);
 
         $this->userId = $userId;
 
-        if ($userId) {
+        if ($this->userId) {
             $user = User::findOrFail($userId);
             $this->name = $user->name;
             $this->email = $user->email;
@@ -99,11 +99,22 @@ class UserForm extends Component
         }
 
         $this->open = false;
-        
+        $this->reset(['name', 'email', 'password', 'password_confirmation', 'role', 'userId']);
+        $this->dispatch('userSaved')->to(UserIndex::class);
+        $this->dispatch('notify', message: $message);
+
+    }
+
+    public function close()
+    {
+        $this->open = false;
+        $this->reset(['name', 'email', 'password', 'password_confirmation', 'role', 'userId']);
     }
 
     public function render()
     {
-        return view('livewire.users.user-form');
+        return view('livewire.users.user-form', [
+            'roles' => User::getRoles(),
+        ]);
     }
 }

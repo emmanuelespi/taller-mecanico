@@ -23,6 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'is_active',
     ];
 
     /**
@@ -46,6 +47,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'deleted_at' => 'datetime',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -77,6 +79,11 @@ class User extends Authenticatable
     public function isReceptionist(): bool
     {
         return $this->role === 'recepcionista';
+    }
+
+    public function isActive(): bool
+    {
+        return $this->is_active && !$this->trashed();
     }
 
     public static function getRoles(): array

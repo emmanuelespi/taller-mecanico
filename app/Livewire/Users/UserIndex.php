@@ -15,9 +15,15 @@ class UserIndex extends Component
 
     public $roleFilter = 'all';
 
+    public $statusFilter = 'all';
+
     public $showConfirmModal = false;
 
     public $deleteId = null;
+
+    public $showActivateModal = false;
+
+    public $activateId = null;
 
     protected $queryString = ['search', 'roleFilter'];
 
@@ -71,11 +77,11 @@ class UserIndex extends Component
     public function toggleActive($id)
     {
         try {
-            $user = User::withTrashed()->findOrFail($id);
+            $user = User::findOrFail($id);
             $manager = new UserManager;
             $manager->toggleActive($user);
 
-            $status = $user->trashed() ? 'desactivado' : 'activado';
+            $status = $user->is_active ? 'activado' : 'desactivado';
             $this->dispatch('notify', message: "Usuario {$status} correctamente.");
 
             $this->resetPage();
@@ -87,7 +93,7 @@ class UserIndex extends Component
     public function render()
     {
         $manager = new UserManager;
-        $users = $manager->getAll($this->search, $this->roleFilter);
+        $users = $manager->getAll($this->search, $this->roleFilter, $this->statusFilter);
 
         return view('livewire.users.user-index', [
             'users' => $users,
