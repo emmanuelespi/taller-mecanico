@@ -10,6 +10,7 @@ use App\Livewire\Vehicles\VehicleIndex;
 use App\Livewire\WorkOrders\WorkOrderIndex;
 use Illuminate\Support\Facades\Route;
 
+
 Route::get('/', function () {
     return redirect()->route('login');
 });
