@@ -81,7 +81,7 @@ class UserManager
         if (auth()->id() === $user->id && $user->is_active) {
             throw new \Exception('No se puede desactivar tu propio usuario.');
         }
-        $user->is_active = $user->is_active;
+        $user->is_active = !$user->is_active;
         $user->save();
 
         return $user;
