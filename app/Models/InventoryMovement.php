@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class InventoryMovement extends Model
 {
     protected $fillable = [
-        'spate_part_id',
+        'spare_part_id',
         'user_id',
         'type',
         'quantity',

@@ -14,12 +14,22 @@ return new class extends Migration
         Schema::create('spare_parts', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('sku')->unique()->nullable();
             $table->text('description')->nullable();
-            $table->decimal('unit_price', 10, 2);
+            $table->string('category')->nullable();
+            $table->string('unit')->default('pieza');
+            $table->decimal('unit_price', 10, 2)->default(0);
+            $table->decimal('purchase_price', 10, 2)->default(0);
             $table->integer('stock')->default(0);
             $table->integer('minium_stock')->default(5);
-            $table->softDeletes();
+            $table->string('location')->nullable();
+            $table->string('supplier')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
+
+            $table->index('sku');
+            $table->index('category');
+            $table->index('is_active');
         });
     }
 
