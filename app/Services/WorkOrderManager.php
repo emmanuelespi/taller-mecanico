@@ -1,0 +1,184 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\SparePart;
+use App\Models\WorkOrder;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+
+class WorkOrderManager
+{
+    public function getAll(string $search = '', string $status = 'all', string $dateFrom = '', string $dateTo = ''): LengthAwarePaginator
+    {
+        $query = WorkOrder::with('client', 'vehicle', 'mechanic');
+
+        if ($status && $status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('order_number', 'like', "%{$search}%")
+                    ->orWhereHas('client', function ($q) use ($search) {
+                        $q->where('name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('vehicle', function ($q) use ($search) {
+                        $q->where('plate', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        if ($dateFrom) {
+            $query->whereDate('entry_date', '>=', $dateFrom);
+        }
+
+        if ($dateTo) {
+            $query->whereDate('entry_date', '<=', $dateTo);
+        }
+
+        return $query->orderBy('created_at', 'desc')->paginate(10);
+
+    }
+
+    public function create(array $data): workOrder
+    {
+        return DB::transaction(function () use ($data) {
+            $data['order_number'] = $this->generateOrderNumber();
+            $data['entry_date'] = now();
+
+            return WorkOrder::create($data);
+        });
+    }
+
+    public function update(WorkOrder $order, array $data): WorkOrder
+    {
+        return DB::transaction(function () use ($data) {
+            $order->update($data);
+
+            return $order;
+        });
+    }
+
+    public function addService(WorkOrder $order, int $serviceId, float $unitPrice, int $quantity = 1): void
+    {
+        DB::transaction(function () use ($order, $serviceId, $unitPrice, $quantity) {
+            $order->service()->attach($serviceId, [
+                'quantity' => $quantity,
+                'unit_price' => $unitPrice,
+            ]);
+
+            $order->calculateTotals();
+        });
+    }
+
+    public function addSpareParts(WorkOrder $order, int $partId, int $quantity, float $unitPrice): void
+    {
+        DB::transaction(function () use ($order, $partId, $quantity, $unitPrice) {
+            $part = SparePart::findOrFail($partId);
+
+            if (! $part->hasStock($quantity)) {
+                throw new \Exception("Stock insuficiente para {$part->name}. Disponible: {$part->stock}");
+            }
+
+            $order->spareParts()->attach($partId, [
+                'quantity' => $quantity,
+                'unit_price' => $unitPrice,
+            ]);
+
+            $order->calculateTotals();
+        });
+    }
+
+    public function removeService(WorkOrder $order, int $serviceId): void
+    {
+        DB::transaction(function () use ($order, $serviceId) {
+            $order->services()->detach($serviceId);
+            $order->calculateTotals();
+        });
+    }
+
+    public function removeSparePart(WorkOrder $order, int $partId): void
+    {
+        DB::transaction(function () use ($order, $partId) {
+            $order->spareParts()->detach($partId);
+            $order->calculateTotals();
+        });
+    }
+
+    public function changeStatus(WorkOrder $order, string $newStatus): WorkOrder
+    {
+        return DB::transaction(function () use ($order, $newStatus) {
+            $oldStatus = $order->status;
+
+            if ($newStatus === 'completed' && $oldStatus !== 'completed') {
+                foreach ($order->spareParts as $part) {
+                    if (! $part->hasStock($part->pivot->quantity)) {
+                        throw new \Exception("Stock insuficiente para {$part->name}");
+                    }
+                    $part->stock = $part->pivot->quantity;
+                    $part->save();
+                }
+                $order->completed_at = now();
+            }
+
+            if ($newStatus === 'delivered') {
+                $order->delivered_at = now();
+            }
+
+            if ($newStatus === 'canceled' && $oldStatus === 'completed') {
+                foreach ($order->spareParts as $part) {
+                    $part->stock += $part->pivot->quantity;
+                    $part->save();
+                }
+            }
+
+            $order->status = $newStatus;
+            $order->save();
+
+            return $order;
+        });
+    }
+
+    public function delete(WorkOrder $order): void
+    {
+        if (! $order->isPending()) {
+            throw new \Exception('Solo se pueden eliminar órdenes pendientes.');
+        }
+
+        $order->delete();
+    }
+
+    private function generateOrderNumber(): string
+    {
+        $year = date('Y');
+        $month = date('m');
+
+        $lastOrder = WorkOrder::whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if ($lastOrder && preg_match('/OT-'.$year.$month.'-(\d+)/', $lastOrder->order_number, $matches)) {
+            $newNumber = str_pad((int) $matches[1] + 1, 4, '0', STR_PAD_LEFT);
+        } else {
+            $newNumber = '0001';
+        }
+
+        return "OT-{$year}{$month}-{$newNumber}";
+    }
+
+    public function getStatistics(): array
+    {
+        return [
+            'total' => WorkOrder::count(),
+            'pending' => WorkOrder::where('status', 'pending')->count(),
+            'in_progress' => WorkOrder::where('status', 'in_progress')->count(),
+            'completed' => WorkOrder::where('status', 'completed')->count(),
+            'delivered' => WorkOrder::where('status', 'delivered')->count(),
+            'cancelled' => WorkOrder::where('status', 'cancelled')->count(),
+            'revenue' => WorkOrder::where('status', 'delivered')->sum('total'),
+        ];
+    }
+}
