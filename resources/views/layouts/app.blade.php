@@ -109,6 +109,8 @@
                     Inventario
                 </a>
 
+                
+
                 <p class="text-[10px] font-semibold tracking-[2px] uppercase text-gray-500 px-3 mb-2 mt-4">Sistema</p>
 
                 <a href="#" wire:navigate
@@ -120,6 +122,8 @@
                     </svg>
                     Usuarios
                 </a>
+
+
 
             </nav>
 
@@ -138,8 +142,7 @@
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
                         <button type="submit" class="text-gray-500 transition-colors hover:text-white">
-                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
                             </svg>
                         </button>
@@ -157,7 +160,7 @@
                 class="sticky top-0 z-40 flex items-center justify-between h-16 px-8 border-b bg-card border-border">
                 <div>
                     <h1 class="text-xl font-bold tracking-wide font-rajdhani">{{ $title ?? config('app.name') }}</h1>
-                    <p class="text-xs text-gray-500 mt-0.5">{{ now()->isoFormat('dddd, D [de] MMMM YYYY') }}</p>
+                    <p class="text-xs text-gray-500 mt-0.5">{{ now()->translatedFormat('l, j \d\e F \d\e Y') }}</p>
                 </div>
                 <div class="flex items-center gap-3">
                     <div

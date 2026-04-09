@@ -109,6 +109,16 @@
                     Inventario
                 </a>
 
+                <a href="{{ route('reports.index') }}" wire:navigate
+                    class="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium mb-0.5 transition-all text-gray-400 hover:bg-hover hover:text-white">
+                    <svg class="flex-shrink-0 w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2">
+                        <path d="M4 4v16h16M8 12l3-3 3 3 5-5" />
+                        <path d="M16 8h4v4" />
+                    </svg>
+                    Reportes
+                </a>
+
                 <p class="text-[10px] font-semibold tracking-[2px] uppercase text-gray-500 px-3 mb-2 mt-4">Sistema</p>
 
                 <a href="{{ route('users.index') }}" wire:navigate

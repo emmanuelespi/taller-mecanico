@@ -3,6 +3,7 @@
 use App\Livewire\Clients\ClientIndex;
 use App\Livewire\Dashboard\DashboardIndex;
 use App\Livewire\Inventory\InventoryIndex;
+use App\Livewire\Reports\ReportIndex;
 use App\Livewire\Services\ServiceIndex;
 use App\Livewire\SpareParts\SparePartIndex;
 use App\Livewire\Users\UserIndex;
@@ -35,6 +36,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('services', ServiceIndex::class)->name('services.index');
         Route::get('spare-parts', SparePartIndex::class)->name('spare-parts.index');
         Route::get('users', UserIndex::class)->name('users.index');
+        Route::get('reports', ReportIndex::class)->name('reports.index');
     });
 });
 
