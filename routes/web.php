@@ -7,9 +7,9 @@ use App\Livewire\Services\ServiceIndex;
 use App\Livewire\SpareParts\SparePartIndex;
 use App\Livewire\Users\UserIndex;
 use App\Livewire\Vehicles\VehicleIndex;
+use App\Livewire\WorkOrders\WorkOrderDetails;
 use App\Livewire\WorkOrders\WorkOrderIndex;
 use Illuminate\Support\Facades\Route;
-
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -20,6 +20,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Todos los roles
     Route::get('dashboard', DashboardIndex::class)->name('dashboard');
     Route::get('work-orders', WorkOrderIndex::class)->name('work-orders.index');
+
+    Route::get('work-orders/{order}', WorkOrderDetails::class)->name('work-orders.show');
 
     // Admin y Recepcionista
     Route::middleware(['role:admin,receptionist'])->group(function () {
