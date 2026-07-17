@@ -13,6 +13,7 @@ class InventoryMovement extends Model
         'type',
         'quantity',
         'reason',
+        'reference',
     ];
 
     public function sparePart(): BelongsTo

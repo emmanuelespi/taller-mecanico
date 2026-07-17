@@ -66,7 +66,7 @@ class UserManager
         }
 
         if (auth()->id() === $user->id) {
-            throw new \Exception('No puedes elimminar tu propio usario.');
+            throw new \Exception('No puedes eliminar tu propio usuario.');
         }
 
         $user->delete();

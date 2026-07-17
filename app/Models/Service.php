@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Service extends Model
 {
+    use SoftDeletes;
     protected $fillable = [
         'name',
         'description',
@@ -33,7 +35,7 @@ class Service extends Model
 
     public function scopeSearch($query, $search)
     {
-        return $query->where('name', 'like', "%{$search}")
-            ->orWhere('description', 'like', "%{$search}");
+        return $query->where('name', 'like', "%{$search}%")
+            ->orWhere('description', 'like', "%{$search}%");
     }
 }

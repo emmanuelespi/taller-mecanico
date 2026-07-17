@@ -11,10 +11,10 @@ class ClientService
     {
         return Client::query()
             ->when($search, function ($query, $search) {
-                $query->where('name', 'like', '%{search}%')
-                    ->orWhere('last_name', 'like', '%{search}')
-                    ->orWhere('phone', 'like', '%{search}')
-                    ->orWhere('email', 'like', '%{search}');
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('last_name', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
             })
             ->latest()
             ->paginate(10);

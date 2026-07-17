@@ -38,7 +38,7 @@ class WorkOrderDetails extends Component
         ];
 
         $this->confirmMessage = $messages[$status] ?? '¿Estás seguro de realizar esta acción?';
-        $this->confirmAction = 'ConfirmStatusChange';
+        $this->confirmAction = 'confirmStatusChange';
         $this->showConfirmModal = true;
     }
 

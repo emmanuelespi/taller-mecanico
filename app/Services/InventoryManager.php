@@ -93,9 +93,9 @@ class InventoryManager
         return $product;
     }
 
-    public function udpateStock(SparePart $product, int $quantity, string $type, string $reason, ?string $reference = null): SparePart
+    public function updateStock(SparePart $product, int $quantity, string $type, string $reason, ?string $reference = null): SparePart
     {
-        return DB::transaction(function () use ($product, $quantity, $type) {
+        return DB::transaction(function () use ($product, $quantity, $type, $reason, $reference) {
             if ($type === 'out' && ! $product->hasStock($quantity)) {
                 throw new \Exception("Stock insuficiente para {$product->name} . Disponible: {$product->stock}");
             }

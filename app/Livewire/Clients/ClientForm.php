@@ -93,7 +93,7 @@ class ClientForm extends Component
             $message = 'Cliente actualizado correctamente';
         } else {
             $service->create($data);
-            $message = 'Cliente cread correctamente.';
+            $message = 'Cliente creado correctamente.';
         }
 
         $this->open = false;

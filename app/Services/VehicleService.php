@@ -36,7 +36,7 @@ class VehicleService
 
     public function update(Vehicle $vehicle, array $data): Vehicle
     {
-        if (! isset($data['plate']) && $data['plate'] !== $vehicle->plate) {
+        if (isset($data['plate']) && $data['plate'] !== $vehicle->plate) {
             if (Vehicle::where('plate', $data['plate'])->where('id', '!=', $vehicle->id)->exists()) {
                 throw new \Exception('Ya existe otro vehículo con esta placa.');
             }
@@ -67,7 +67,7 @@ class VehicleService
     public function hasActiveWorkOrders(Vehicle $vehicle): bool
     {
         return $vehicle->workOrders()
-            ->whereIn('status', ['pendin', 'in_progress'])
+            ->whereIn('status', ['pending', 'in_progress'])
             ->exists();
     }
 }

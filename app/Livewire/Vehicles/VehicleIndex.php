@@ -20,7 +20,7 @@ class VehicleIndex extends Component
     protected $queryString = ['search'];
 
     protected $listeners = [
-        'vehicleSaved' => 'refreshVehicles',
+        'vehicleSaved' => 'refreshVehicle',
     ];
 
     public function updatingSearch(): void
@@ -55,7 +55,7 @@ class VehicleIndex extends Component
 
             $this->dispatch('notify', message: 'Vehículo eliminado correctamente.');
         } catch (\Throwable $th) {
-            $this->dispatch('notify', message: 'Error al eliminar'. $e->getMessage(), type: 'error');
+            $this->dispatch('notify', message: 'Error al eliminar: '. $th->getMessage(), type: 'error');
         }
     }
 

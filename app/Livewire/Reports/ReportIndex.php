@@ -108,7 +108,7 @@ class ReportIndex extends Component
                 $client->name.' '.$client->last_name,
                 $client->email ?? '-',
                 $client->phone ?? '-',
-                $client->address ?? '-',
+                trim(implode(' ', array_filter([$client->street, $client->avenue, $client->number]))) ?: '-',
                 $client->vehicles_count,
                 $client->created_at->format('d/m/Y'),
             ];

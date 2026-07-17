@@ -54,7 +54,7 @@ class WorkOrderManager
 
     public function update(WorkOrder $order, array $data): WorkOrder
     {
-        return DB::transaction(function () use ($data) {
+        return DB::transaction(function () use ($order, $data) {
             $order->update($data);
 
             return $order;
@@ -64,7 +64,7 @@ class WorkOrderManager
     public function addService(WorkOrder $order, int $serviceId, float $unitPrice, int $quantity = 1): void
     {
         DB::transaction(function () use ($order, $serviceId, $unitPrice, $quantity) {
-            $order->service()->attach($serviceId, [
+            $order->services()->attach($serviceId, [
                 'quantity' => $quantity,
                 'unit_price' => $unitPrice,
             ]);
@@ -117,7 +117,8 @@ class WorkOrderManager
                     if (! $part->hasStock($part->pivot->quantity)) {
                         throw new \Exception("Stock insuficiente para {$part->name}");
                     }
-                    $part->stock = $part->pivot->quantity;
+                    // Restar stock al completar la orden
+                    $part->stock -= $part->pivot->quantity;
                     $part->save();
                 }
                 $order->completed_at = now();
@@ -127,7 +128,8 @@ class WorkOrderManager
                 $order->delivered_at = now();
             }
 
-            if ($newStatus === 'canceled' && $oldStatus === 'completed') {
+            // Restaurar stock si una orden completada se cancela
+            if ($newStatus === 'cancelled' && $oldStatus === 'completed') {
                 foreach ($order->spareParts as $part) {
                     $part->stock += $part->pivot->quantity;
                     $part->save();
@@ -136,6 +138,7 @@ class WorkOrderManager
 
             $order->status = $newStatus;
             $order->save();
+            $order->refresh();
 
             return $order;
         });

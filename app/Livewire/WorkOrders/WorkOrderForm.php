@@ -43,7 +43,7 @@ class WorkOrderForm extends Component
 
     public $selectedServiceQuantity = 1;
 
-    public $selectedSparePart = '';
+    public $selectedSparePartId = '';
 
     public $selectedSparePartQuantity = 1;
 
@@ -235,6 +235,7 @@ class WorkOrderForm extends Component
 
             return;
         }
+
         $data = [
             'client_id' => $this->client_id,
             'vehicle_id' => $this->vehicle_id,
@@ -247,17 +248,21 @@ class WorkOrderForm extends Component
         $manager = new WorkOrderManager;
 
         if ($this->orderId) {
+            // Actualizar orden existente
             $order = WorkOrder::findOrFail($this->orderId);
-
-            $order->service()->detach();
+            $order->services()->detach();
             $order->spareParts()->detach();
-
             $manager->update($order, $data);
             $message = 'Orden actualizada correctamente';
+        } else {
+            // Crear nueva orden
+            $data['user_id'] = auth()->id();
+            $order = $manager->create($data);
+            $message = 'Orden creada correctamente';
         }
 
         foreach ($this->services as $service) {
-            $order->service()->attach($service['id'], [
+            $order->services()->attach($service['id'], [
                 'quantity' => $service['quantity'],
                 'unit_price' => $service['unit_price'],
             ]);
@@ -270,7 +275,7 @@ class WorkOrderForm extends Component
             ]);
         }
 
-        $order = calculateTotals();
+        $order->calculateTotals();
 
         $this->open = false;
         $this->reset();

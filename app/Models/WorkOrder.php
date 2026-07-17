@@ -87,7 +87,7 @@ class WorkOrder extends Model
 
     public function scopeComplete($query)
     {
-        return $query->where('status', ' complete');
+        return $query->where('status', 'completed');
     }
 
     public function scopeDelivered($query)

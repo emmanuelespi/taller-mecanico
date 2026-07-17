@@ -34,7 +34,7 @@ class ServiceForm extends Component
         ];
     }
 
-    protected $message = [
+    protected $messages = [
         'name.required' => 'El nombre del servicio es obligatoria.',
         'name.unique' => 'Ya existe un servicio con este nombre.',
         'price.required' => 'El precio es obligatorio.',

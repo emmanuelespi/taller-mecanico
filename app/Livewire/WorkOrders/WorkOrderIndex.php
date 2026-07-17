@@ -44,7 +44,7 @@ class WorkOrderIndex extends Component
         $this->resetPage();
     }
 
-    public function updateDateTo()
+    public function updatedDateTo()
     {
         $this->resetPage();
     }
@@ -57,12 +57,12 @@ class WorkOrderIndex extends Component
     public function openDeleteModal($id)
     {
         $this->deleteId = $id;
-        $this->showConfirmmodal = true;
+        $this->showConfirmModal = true;
     }
 
     public function cancelDelete()
     {
-        $this->showConfirmmodal = false;
+        $this->showConfirmModal = false;
         $this->deleteId = null;
     }
 
@@ -70,13 +70,13 @@ class WorkOrderIndex extends Component
     {
         try {
             $order = WorkOrder::findOrFail($this->deleteId);
-            $manager = WorkOrderManager();
+            $manager = new WorkOrderManager;
             $manager->delete($order);
 
-            $this->showConfirmmodal = false;
+            $this->showConfirmModal = false;
             $this->deleteId = null;
 
-            $this->dispatch('notify', message: 'Order eliminada correctamente.');
+            $this->dispatch('notify', message: 'Orden eliminada correctamente.');
 
         } catch (\Exception $e) {
             $this->dispatch('notify', message: $e->getMessage(), type: 'error');

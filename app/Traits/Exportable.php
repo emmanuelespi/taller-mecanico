@@ -24,7 +24,7 @@ trait Exportable
         fclose($output);
 
         return response($csv, 200, [
-            'Content-Type' => 'text/css; charset=UTF-8',
+            'Content-Type' => 'text/csv; charset=UTF-8',
             'Content-Disposition' => "attachment; filename=\"{$filename}.csv\"",
         ]);
 
