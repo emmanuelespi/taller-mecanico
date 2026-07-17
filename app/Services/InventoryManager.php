@@ -51,6 +51,8 @@ class InventoryManager
                 ]);
             }
 
+            $this->checkAndNotifyLowStock($product);
+
             return $product;
         });
     }
@@ -72,6 +74,8 @@ class InventoryManager
                 'reason' => 'Ajuste de inventario',
             ]);
         }
+
+        $this->checkAndNotifyLowStock($product);
 
         return $product;
     }
@@ -95,7 +99,7 @@ class InventoryManager
 
     public function updateStock(SparePart $product, int $quantity, string $type, string $reason, ?string $reference = null): SparePart
     {
-        return DB::transaction(function () use ($product, $quantity, $type, $reason, $reference) {
+        $product = DB::transaction(function () use ($product, $quantity, $type, $reason, $reference) {
             if ($type === 'out' && ! $product->hasStock($quantity)) {
                 throw new \Exception("Stock insuficiente para {$product->name} . Disponible: {$product->stock}");
             }
@@ -114,6 +118,18 @@ class InventoryManager
 
             return $product;
         });
+
+        $this->checkAndNotifyLowStock($product);
+
+        return $product;
+    }
+
+    protected function checkAndNotifyLowStock(SparePart $product): void
+    {
+        if ($product->stock <= $product->minimum_stock && $product->is_active) {
+            $users = \App\Models\User::whereIn('role', ['admin', 'recepcionista'])->where('is_active', true)->get();
+            \Illuminate\Support\Facades\Notification::send($users, new \App\Notifications\LowStockNotification($product));
+        }
     }
 
     public function getLowStockProducts(): Collection

@@ -44,12 +44,20 @@ class WorkOrderManager
 
     public function create(array $data): workOrder
     {
-        return DB::transaction(function () use ($data) {
+        $order = DB::transaction(function () use ($data) {
             $data['order_number'] = $this->generateOrderNumber();
             $data['entry_date'] = now();
 
             return WorkOrder::create($data);
         });
+
+        // Notificar nueva orden
+        $users = \App\Models\User::whereIn('role', ['admin', 'recepcionista', 'mecanico'])
+            ->where('is_active', true)
+            ->get();
+        \Illuminate\Support\Facades\Notification::send($users, new \App\Notifications\NewWorkOrderNotification($order));
+
+        return $order;
     }
 
     public function update(WorkOrder $order, array $data): WorkOrder
@@ -109,9 +117,9 @@ class WorkOrderManager
 
     public function changeStatus(WorkOrder $order, string $newStatus): WorkOrder
     {
-        return DB::transaction(function () use ($order, $newStatus) {
-            $oldStatus = $order->status;
+        $oldStatus = $order->status;
 
+        $order = DB::transaction(function () use ($order, $newStatus, $oldStatus) {
             if ($newStatus === 'completed' && $oldStatus !== 'completed') {
                 foreach ($order->spareParts as $part) {
                     if (! $part->hasStock($part->pivot->quantity)) {
@@ -120,6 +128,12 @@ class WorkOrderManager
                     // Restar stock al completar la orden
                     $part->stock -= $part->pivot->quantity;
                     $part->save();
+
+                    // Notificar stock bajo de este repuesto si aplica
+                    if ($part->stock <= $part->minimum_stock && $part->is_active) {
+                        $admins = \App\Models\User::whereIn('role', ['admin', 'recepcionista'])->where('is_active', true)->get();
+                        \Illuminate\Support\Facades\Notification::send($admins, new \App\Notifications\LowStockNotification($part));
+                    }
                 }
                 $order->completed_at = now();
             }
@@ -142,6 +156,14 @@ class WorkOrderManager
 
             return $order;
         });
+
+        // Notificar orden completada
+        if ($newStatus === 'completed' && $oldStatus !== 'completed') {
+            $users = \App\Models\User::whereIn('role', ['admin', 'recepcionista'])->where('is_active', true)->get();
+            \Illuminate\Support\Facades\Notification::send($users, new \App\Notifications\OrderCompletedNotification($order));
+        }
+
+        return $order;
     }
 
     public function delete(WorkOrder $order): void

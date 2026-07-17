@@ -163,14 +163,7 @@
                     <p class="text-xs text-gray-500 mt-0.5">{{ now()->translatedFormat('l, j \d\e F \d\e Y') }}</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <div
-                        class="relative flex items-center justify-center transition-colors border rounded-lg cursor-pointer w-9 h-9 bg-base border-border hover:bg-hover">
-                        <svg class="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                            stroke-width="2">
-                            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" />
-                        </svg>
-                        <div class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-accent rounded-full"></div>
-                    </div>
+                    <livewire:shared.notification-bell />
                     {{ $actions ?? '' }}
                 </div>
             </header>
