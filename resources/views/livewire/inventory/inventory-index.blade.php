@@ -103,6 +103,15 @@
                         </td>
                         <td class="px-5 py-3.5">
                             <div class="flex items-center gap-2">
+                                <!-- Restock rápido -->
+                                <button wire:click="openRestockModal({{ $product->id }})"
+                                    class="flex items-center justify-center w-8 h-8 text-green-400 transition-colors rounded-lg bg-green-500/10 hover:bg-green-500/20"
+                                    title="Registrar restock / bajas de inventario">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                </button>
+
                                 <!-- Editar -->
                                 <button wire:click="$dispatch('openProductModal', { productId: {{ $product->id }} })"
                                     class="flex items-center justify-center w-8 h-8 text-blue-400 transition-colors rounded-lg bg-blue-500/10 hover:bg-blue-500/20"
@@ -202,6 +211,104 @@
                 <button wire:click="deleteProduct"
                     class="px-4 py-2.5 text-sm font-semibold text-white bg-red-500 hover:bg-red-600 rounded-lg transition-all shadow-lg hover:shadow-red-500/25">
                     Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- MODAL DE RESTOCK / AJUSTE RÁPIDO -->
+    @if($showRestockModal)
+    <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto">
+        <div class="w-full max-w-lg bg-gray-900 border border-gray-800 shadow-2xl rounded-2xl">
+            <!-- Header -->
+            <div class="flex items-center justify-between px-6 py-4 border-b border-gray-800">
+                <div>
+                    <h2 class="text-xl font-bold text-white">Ajuste de Stock Rápido</h2>
+                    <p class="text-xs text-gray-400 mt-0.5">{{ $selectedProductName }}</p>
+                </div>
+                <button wire:click="closeRestock" class="text-gray-500 transition-colors hover:text-white">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Body -->
+            <div class="p-6 space-y-4">
+                <!-- Stock actual informativo -->
+                <div class="flex items-center justify-between p-3 rounded-lg bg-gray-800/40 border border-gray-800 text-sm">
+                    <span class="text-gray-400">Stock actual en sistema:</span>
+                    <span class="font-bold text-orange-400">{{ $selectedProductStock }} unidades</span>
+                </div>
+
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <!-- Tipo de Ajuste -->
+                    <div>
+                        <label class="block text-[11px] font-semibold tracking-widest uppercase text-gray-400 mb-1.5">
+                            Tipo de Movimiento *
+                        </label>
+                        <select wire:model.live="restockType"
+                            class="w-full bg-gray-800 border border-gray-700 rounded-lg py-2.5 px-3.5 text-sm text-white focus:outline-none focus:border-orange-500">
+                            <option value="in">Entrada / Incremento (+)</option>
+                            <option value="out">Salida / Disminución (-)</option>
+                        </select>
+                    </div>
+
+                    <!-- Cantidad -->
+                    <div>
+                        <label class="block text-[11px] font-semibold tracking-widest uppercase text-gray-400 mb-1.5">
+                            Cantidad *
+                        </label>
+                        <input wire:model="restockQuantity" type="number" min="1" step="1"
+                            class="w-full bg-gray-800 border border-gray-700 rounded-lg py-2.5 px-3.5 text-sm text-white focus:outline-none focus:border-orange-500">
+                        @error('restockQuantity') <span class="mt-1 text-xs text-red-400">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+
+                <!-- Razón del ajuste -->
+                <div>
+                    <label class="block text-[11px] font-semibold tracking-widest uppercase text-gray-400 mb-1.5">
+                        Razón del Ajuste *
+                    </label>
+                    <select wire:model="restockReason"
+                        class="w-full bg-gray-800 border border-gray-700 rounded-lg py-2.5 px-3.5 text-sm text-white focus:outline-none focus:border-orange-500">
+                        @if($restockType === 'in')
+                            <option value="Compra de mercadería (Restock)">Compra de mercadería (Restock / Lote)</option>
+                            <option value="Ajuste por inventario físico">Ajuste por inventario físico</option>
+                            <option value="Devolución de orden de trabajo">Devolución de orden de trabajo</option>
+                            <option value="Otro">Otro motivo de Entrada</option>
+                        @else
+                            <option value="Baja por producto defectuoso / dañado">Baja por producto defectuoso / dañado</option>
+                            <option value="Merma o pérdida">Merma o pérdida</option>
+                            <option value="Ajuste por inventario físico">Ajuste por inventario físico</option>
+                            <option value="Consumo interno">Consumo interno / Taller</option>
+                            <option value="Otro">Otro motivo de Salida</option>
+                        @endif
+                    </select>
+                    @error('restockReason') <span class="mt-1 text-xs text-red-400">{{ $message }}</span> @enderror
+                </div>
+
+                <!-- Referencia (Factura / Lote) -->
+                <div>
+                    <label class="block text-[11px] font-semibold tracking-widest uppercase text-gray-400 mb-1.5">
+                        Referencia / Lote / Factura
+                    </label>
+                    <input wire:model="restockReference" type="text" placeholder="Ej: Lote #105, Factura F-450, etc."
+                        class="w-full bg-gray-800 border border-gray-700 rounded-lg py-2.5 px-3.5 text-sm text-white focus:outline-none focus:border-orange-500">
+                    @error('restockReference') <span class="mt-1 text-xs text-red-400">{{ $message }}</span> @enderror
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-800">
+                <button wire:click="closeRestock"
+                    class="px-4 py-2.5 text-sm font-semibold text-gray-400 border border-gray-700 rounded-lg hover:bg-gray-800 hover:text-white transition-all">
+                    Cancelar
+                </button>
+                <button wire:click="saveRestock"
+                    class="px-4 py-2.5 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition-all shadow-lg hover:shadow-green-600/25">
+                    Aplicar Ajuste
                 </button>
             </div>
         </div>

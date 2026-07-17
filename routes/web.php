@@ -25,7 +25,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('work-orders/{order}', WorkOrderDetails::class)->name('work-orders.show');
 
     // Admin y Recepcionista
-    Route::middleware(['role:admin,receptionist'])->group(function () {
+    Route::middleware(['role:admin,recepcionista'])->group(function () {
         Route::get('clients', ClientIndex::class)->name('clients.index');
         Route::get('vehicles', VehicleIndex::class)->name('vehicles.index');
         Route::get('inventory', InventoryIndex::class)->name('inventory.index');

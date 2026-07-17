@@ -22,6 +22,16 @@ class InventoryIndex extends Component
 
     public $deleteId = null;
 
+    // Propiedades del modal de Restock / Ajuste
+    public $showRestockModal = false;
+    public $selectedProductId = null;
+    public $selectedProductName = '';
+    public $selectedProductStock = 0;
+    public $restockQuantity = 1;
+    public $restockType = 'in';
+    public $restockReason = 'Compra de mercadería (Restock)';
+    public $restockReference = '';
+
     protected $queryString = ['search', 'categoryFilter', 'onlyLowStock'];
 
     protected $listeners = [
@@ -41,6 +51,61 @@ class InventoryIndex extends Component
     public function refreshProducts()
     {
         $this->resetPage();
+    }
+
+    // Métodos del modal de Restock / Ajuste
+    public function openRestockModal($productId)
+    {
+        $product = SparePart::findOrFail($productId);
+        $this->selectedProductId = $product->id;
+        $this->selectedProductName = $product->name;
+        $this->selectedProductStock = $product->stock;
+        $this->restockQuantity = 1;
+        $this->restockType = 'in';
+        $this->restockReason = 'Compra de mercadería (Restock)';
+        $this->restockReference = '';
+        $this->showRestockModal = true;
+    }
+
+    public function closeRestock()
+    {
+        $this->showRestockModal = false;
+        $this->reset(['selectedProductId', 'selectedProductName', 'selectedProductStock', 'restockQuantity', 'restockType', 'restockReason', 'restockReference']);
+    }
+
+    public function saveRestock()
+    {
+        $this->validate([
+            'restockQuantity' => 'required|integer|min:1',
+            'restockType' => 'required|in:in,out',
+            'restockReason' => 'required|string|max:255',
+            'restockReference' => 'nullable|string|max:100',
+        ], [
+            'restockQuantity.required' => 'La cantidad es obligatoria.',
+            'restockQuantity.integer' => 'La cantidad debe ser un número entero.',
+            'restockQuantity.min' => 'La cantidad debe ser al menos 1.',
+            'restockReason.required' => 'La razón del ajuste es obligatoria.',
+        ]);
+
+        try {
+            $product = SparePart::findOrFail($this->selectedProductId);
+            $manager = new InventoryManager;
+
+            $manager->updateStock(
+                $product,
+                (int) $this->restockQuantity,
+                $this->restockType,
+                $this->restockReason,
+                $this->restockReference
+            );
+
+            $this->showRestockModal = false;
+            $this->dispatch('notify', message: 'Inventario actualizado correctamente.');
+            $this->resetPage();
+            $this->closeRestock();
+        } catch (\Exception $e) {
+            $this->dispatch('notify', message: $e->getMessage(), type: 'error');
+        }
     }
 
     public function openDeleteModal($id)

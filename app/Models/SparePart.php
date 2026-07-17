@@ -100,4 +100,22 @@ class SparePart extends Model
     {
         return $this->stock >= $quantity;
     }
+
+    // Accessors
+    public function getCategoryLabelAttribute(): string
+    {
+        $categoryEnum = \App\Enums\ProductsCategory::tryFrom($this->category);
+        return $categoryEnum ? $categoryEnum->label() : ($this->category ?? 'N/A');
+    }
+
+    public function getStockClassAttribute(): string
+    {
+        if ($this->stock <= 0) {
+            return 'text-red-500 font-bold';
+        }
+        if ($this->stock <= $this->minimum_stock) {
+            return 'text-yellow-500 font-semibold';
+        }
+        return 'text-gray-200';
+    }
 }

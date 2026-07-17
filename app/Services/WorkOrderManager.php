@@ -129,6 +129,16 @@ class WorkOrderManager
                     $part->stock -= $part->pivot->quantity;
                     $part->save();
 
+                    // Registrar movimiento de inventario por venta/consumo
+                    \App\Models\InventoryMovement::create([
+                        'spare_part_id' => $part->id,
+                        'user_id'       => auth()->id() ?: $order->user_id,
+                        'type'          => 'out',
+                        'quantity'      => $part->pivot->quantity,
+                        'reason'        => "Consumo en orden {$order->order_number}",
+                        'reference'     => $order->order_number,
+                    ]);
+
                     // Notificar stock bajo de este repuesto si aplica
                     if ($part->stock <= $part->minimum_stock && $part->is_active) {
                         $admins = \App\Models\User::whereIn('role', ['admin', 'recepcionista'])->where('is_active', true)->get();
@@ -147,6 +157,16 @@ class WorkOrderManager
                 foreach ($order->spareParts as $part) {
                     $part->stock += $part->pivot->quantity;
                     $part->save();
+
+                    // Registrar movimiento de inventario por devolución/retorno
+                    \App\Models\InventoryMovement::create([
+                        'spare_part_id' => $part->id,
+                        'user_id'       => auth()->id() ?: $order->user_id,
+                        'type'          => 'in',
+                        'quantity'      => $part->pivot->quantity,
+                        'reason'        => "Devolución por cancelación de orden {$order->order_number}",
+                        'reference'     => $order->order_number,
+                    ]);
                 }
             }
 
