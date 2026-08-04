@@ -46,8 +46,10 @@
                                 {{ !$client_id ? 'disabled' : '' }}>
                                 <option value="">Seleccionar vehículo</option>
                                 @foreach($vehicles as $vehicle)
-                                <option value="{{ $vehicle->id }}">{{ $vehicle->plate }} - {{ $vehicle->brand }} {{
-                                    $vehicle->model }}</option>
+                                <option value="{{ $vehicle->id }}" {{ $vehicle->has_active_order ? 'disabled' : '' }}>
+                                    {{ $vehicle->plate }} - {{ $vehicle->brand }} {{ $vehicle->model }}
+                                    @if($vehicle->has_active_order) (En taller - Orden Activa) @endif
+                                </option>
                                 @endforeach
                             </select>
                             @error('vehicle_id') <span class="mt-1 text-xs text-red-400">{{ $message }}</span> @enderror

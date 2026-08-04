@@ -174,6 +174,15 @@ class WorkOrderManager
             $order->save();
             $order->refresh();
 
+            // Registrar transición en la bitácora histórica
+            \App\Models\WorkOrderHistory::create([
+                'work_order_id' => $order->id,
+                'user_id' => auth()->id(),
+                'from_status' => $oldStatus,
+                'to_status' => \App\Enums\WorkOrderStatus::tryFrom($newStatus) ?: $newStatus,
+                'notes' => 'Estado actualizado a: ' . (\App\Enums\WorkOrderStatus::tryFrom($newStatus)?->label() ?? $newStatus),
+            ]);
+
             return $order;
         });
 

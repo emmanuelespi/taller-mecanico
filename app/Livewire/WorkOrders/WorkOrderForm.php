@@ -292,7 +292,22 @@ class WorkOrderForm extends Component
     public function render()
     {
         $clients = Client::orderBy('name')->get();
-        $vehicles = Vehicle::where('client_id', $this->client_id)->orderBy('plate')->get();
+        $vehicles = Vehicle::where('client_id', $this->client_id)
+            ->orderBy('plate')
+            ->get()
+            ->map(function ($vehicle) {
+                $hasActiveOrder = $vehicle->workOrders()
+                    ->whereIn('status', [
+                        \App\Enums\WorkOrderStatus::PENDING,
+                        \App\Enums\WorkOrderStatus::IN_PROGRESS
+                    ])
+                    ->when($this->orderId, function ($q) {
+                        $q->where('id', '!=', $this->orderId);
+                    })
+                    ->exists();
+                $vehicle->has_active_order = $hasActiveOrder;
+                return $vehicle;
+            });
         $mechanics = User::where('role', 'mecanico')->where('is_active', true)->orderBy('name')->get();
         $services = Service::where('active', true)->orderBy('name')->get();
         $spareParts = SparePart::where('is_active', true)->where('stock', '>', 0)->orderBy('name')->get();

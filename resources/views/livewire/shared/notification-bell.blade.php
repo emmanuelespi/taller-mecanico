@@ -96,7 +96,7 @@
                         </svg>
                     </button>
                 </div>
-            @forelse
+            @empty
                 <!-- Estado vacío -->
                 <div class="px-4 py-8 text-center flex flex-col items-center justify-center">
                     <div class="w-10 h-10 rounded-full bg-base/50 flex items-center justify-center text-gray-600 mb-2.5">

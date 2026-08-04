@@ -5,7 +5,7 @@
             <h1 class="text-2xl font-bold text-white">Orden #{{ $order->order_number }}</h1>
             <p class="mt-1 text-gray-400">Creada el {{ $order->created_at->format('d/m/Y H:i') }}</p>
         </div>
-        <div class="flex gap-3">
+        <div class="flex gap-3 print:hidden">
             <a href="{{ route('work-orders.index') }}"
                 class="flex items-center gap-2 px-4 py-2 text-gray-400 transition-all border border-gray-700 rounded-lg hover:bg-gray-800 hover:text-white">
                 <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -13,6 +13,16 @@
                 </svg>
                 Volver
             </a>
+
+            <button onclick="window.print()"
+                class="flex items-center gap-2 px-4 py-2 text-gray-300 transition-all border border-gray-700 rounded-lg hover:bg-gray-800 hover:text-white">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="6 9 6 2 18 2 18 9" />
+                    <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
+                    <rect x="6" y="14" width="12" height="8" />
+                </svg>
+                Imprimir Nota
+            </button>
 
             @if($order->canBeEdited())
             <button wire:click="$dispatch('openOrderModal', { orderId: {{ $order->id }} })"
@@ -26,6 +36,56 @@
             @endif
         </div>
     </div>
+
+    <style>
+    @media print {
+        aside, header, .print\:hidden, button, a, select, input {
+            display: none !important;
+        }
+        .ml-60 {
+            margin-left: 0 !important;
+        }
+        main, .p-8 {
+            padding: 0 !important;
+        }
+        body, .bg-base {
+            background: white !important;
+            color: black !important;
+        }
+        .bg-gray-900, .bg-card, .border-gray-800, .border-border {
+            background: transparent !important;
+            border-color: #e5e7eb !important;
+            color: black !important;
+            box-shadow: none !important;
+        }
+        .text-white, .text-gray-300, .text-gray-400, .text-gray-500 {
+            color: black !important;
+        }
+        .text-orange-400 {
+            color: #d97706 !important;
+        }
+        .grid {
+            display: block !important;
+        }
+        .grid > div {
+            margin-bottom: 1.5rem !important;
+            page-break-inside: avoid;
+        }
+        table {
+            border-collapse: collapse !important;
+            width: 100% !important;
+        }
+        th, td {
+            border: 1px solid #e5e7eb !important;
+            padding: 8px 12px !important;
+            color: black !important;
+        }
+        .divide-y > * + * {
+            border-top-width: 1px !important;
+            border-color: #e5e7eb !important;
+        }
+    }
+    </style>
 
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <!-- Información Principal -->
@@ -154,6 +214,41 @@
                             @endforelse
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <!-- Historial de Transiciones (Bitácora) -->
+            <div class="overflow-hidden bg-gray-900 border border-gray-800 rounded-xl print:hidden">
+                <div class="px-6 py-4 border-b border-gray-800">
+                    <h2 class="text-lg font-semibold text-white">Historial de Transiciones</h2>
+                </div>
+                <div class="p-6">
+                    @if($order->histories->isNotEmpty())
+                    <div class="relative pl-6 border-l border-gray-800 space-y-6">
+                        @foreach($order->histories as $history)
+                        <div class="relative">
+                            <!-- Bullet -->
+                            <span class="absolute -left-[31px] top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-gray-900 border-2 border-orange-500"></span>
+
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
+                                <div class="text-sm font-semibold text-white">
+                                    {{ $history->from_status ? $history->from_status->label() : 'Ingreso' }}
+                                    →
+                                    <span class="text-orange-400 font-bold">{{ $history->to_status->label() }}</span>
+                                </div>
+                                <div class="text-xs text-gray-500">
+                                    {{ $history->created_at->format('d/m/Y H:i') }} ({{ $history->created_at->diffForHumans() }})
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-400 mt-1">
+                                Realizado por: <span class="text-gray-300 font-medium">{{ $history->user ? $history->user->name : 'Sistema (Seeder/Automático)' }}</span>
+                            </p>
+                        </div>
+                        @endforeach
+                    </div>
+                    @else
+                    <p class="text-sm text-gray-500 text-center py-4">No hay registros de transiciones para esta orden.</p>
+                    @endif
                 </div>
             </div>
         </div>

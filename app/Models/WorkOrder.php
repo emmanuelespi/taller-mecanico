@@ -39,6 +39,7 @@ class WorkOrder extends Model
         'subtotal' => 'decimal:2',
         'tax' => 'decimal:2',
         'total' => 'decimal:2',
+        'status' => \App\Enums\WorkOrderStatus::class,
     ];
 
     public function client(): BelongsTo
@@ -75,60 +76,51 @@ class WorkOrder extends Model
             ->withTimestamps();
     }
 
+    public function histories(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(WorkOrderHistory::class)->latest();
+    }
+
     public function scopePending($query)
     {
-        return $query->where('status', 'pending');
+        return $query->where('status', \App\Enums\WorkOrderStatus::PENDING);
     }
 
     public function scopeInProgress($query)
     {
-        return $query->where('status', 'in_progress');
+        return $query->where('status', \App\Enums\WorkOrderStatus::IN_PROGRESS);
     }
 
     public function scopeComplete($query)
     {
-        return $query->where('status', 'completed');
+        return $query->where('status', \App\Enums\WorkOrderStatus::COMPLETED);
     }
 
     public function scopeDelivered($query)
     {
-        return $query->where('status', 'delivered');
+        return $query->where('status', \App\Enums\WorkOrderStatus::DELIVERED);
     }
 
     public function getStatusLabelAttribute(): string
     {
-        return match ($this->status) {
-            'pending' => 'Pendiente',
-            'in_progress' => 'En Progreso',
-            'completed' => 'Completado',
-            'delivered' => 'Entregado',
-            'cancelled' => 'Cancelado',
-            default => $this->status,
-        };
+        return $this->status ? $this->status->label() : 'Pendiente';
     }
 
     public function getStatusColorAttribute(): string
     {
         return match ($this->status) {
-            'pending' => 'yellow',
-            'in_progress' => 'blue',
-            'completed' => 'green',
-            'delivered' => 'gray',
-            'cancelled' => 'red',
+            \App\Enums\WorkOrderStatus::PENDING => 'yellow',
+            \App\Enums\WorkOrderStatus::IN_PROGRESS => 'blue',
+            \App\Enums\WorkOrderStatus::COMPLETED => 'green',
+            \App\Enums\WorkOrderStatus::DELIVERED => 'gray',
+            \App\Enums\WorkOrderStatus::CANCELLED => 'red',
             default => 'gray',
         };
     }
 
     public function getStatusBadgeAttribute(): string
     {
-        return match ($this->status) {
-            'pending' => 'bg-yellow-500/10 text-yellow-400',
-            'in_progress' => 'bg-blue-500/10 text-blue-400',
-            'completed' => 'bg-green-500/10 text-green-400',
-            'delivered' => 'bg-gray-500/10 text-gray-400',
-            'cancelled' => 'bg-red-500/10 text-red-400',
-            default => 'bg-gray-500/10 text-gray-400',
-        };
+        return $this->status ? $this->status->color() : 'bg-gray-500/10 text-gray-400';
     }
 
     public function getFormattedTotalAttribute(): string
@@ -138,32 +130,36 @@ class WorkOrder extends Model
 
     public function isPending(): bool
     {
-        return $this->status === 'pending';
+        return $this->status === \App\Enums\WorkOrderStatus::PENDING;
     }
 
     public function isInProgress(): bool
     {
-        return $this->status === 'in_progress';
+        return $this->status === \App\Enums\WorkOrderStatus::IN_PROGRESS;
     }
 
     public function isCompleted(): bool
     {
-        return $this->status === 'completed';
+        return $this->status === \App\Enums\WorkOrderStatus::COMPLETED;
     }
 
     public function isDelivered(): bool
     {
-        return $this->status === 'delivered';
+        return $this->status === \App\Enums\WorkOrderStatus::DELIVERED;
     }
 
     public function isCancelled(): bool
     {
-        return $this->status === 'cancelled';
+        return $this->status === \App\Enums\WorkOrderStatus::CANCELLED;
     }
 
     public function canBeEdited(): bool
     {
-        return ! in_array($this->status, ['completed', 'delivered', 'cancelled']);
+        return ! in_array($this->status, [
+            \App\Enums\WorkOrderStatus::COMPLETED,
+            \App\Enums\WorkOrderStatus::DELIVERED,
+            \App\Enums\WorkOrderStatus::CANCELLED
+        ]);
     }
 
     public function calculateTotals(): void
