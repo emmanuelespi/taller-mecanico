@@ -9,11 +9,11 @@ use Illuminate\Http\Request;
 
 class WorkOrderApiController extends Controller
 {
-    protected workOrderManager $workOrderManager;
+    protected WorkOrderManager $workOrderManager;
 
     public function __construct(WorkOrderManager $workOrderManager)
     {
-        $this->workOrderManager;
+        $this->workOrderManager = $workOrderManager;
     }
 
     public function index(Request $request)
@@ -54,6 +54,9 @@ class WorkOrderApiController extends Controller
             'status' => 'nullable|string',
         ]);
 
+        $validated['problem_description'] = $validated['description'];
+        unset($validated['description']);
+
         try {
             $order = $this->workOrderManager->create($validated);
 
@@ -93,7 +96,7 @@ class WorkOrderApiController extends Controller
     public function addSparePart(Request $request, WorkOrder $order)
     {
         $request->validate([
-            'part_id' => 'required|integer|exists:spare_part,id',
+            'part_id' => 'required|integer|exists:spare_parts,id',
             'quantity' => 'required|integer|min:1',
             'unit_price' => 'required|numeric|min:0'
         ]);
