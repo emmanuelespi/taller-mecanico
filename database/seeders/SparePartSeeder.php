@@ -6,12 +6,15 @@ use App\Models\InventoryMovement;
 use App\Models\SparePart;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class SparePartSeeder extends Seeder
 {
     public function run(): void
     {
-        $adminId = User::where('role', 'admin')->first()->id;
+        // Obtener ID de administrador o usar fallback/creación
+        $admin = User::where('role', 'admin')->first();
+        $adminId = $admin ? $admin->id : User::first()?->id;
 
         $parts = [
             // ── Aceites ───────────────────────────────────────────────
@@ -79,7 +82,7 @@ class SparePartSeeder extends Seeder
                 'unit'           => 'pieza',
                 'unit_price'     => 85.00,
                 'purchase_price' => 55.00,
-                'stock'          => 3,  // stock bajo — para demostración de alerta
+                'stock'          => 3,
                 'minimum_stock'  => 8,
                 'location'       => 'Estante A-3',
                 'supplier'       => 'Refacciones Express',
@@ -137,7 +140,7 @@ class SparePartSeeder extends Seeder
                 'unit'           => 'pieza',
                 'unit_price'     => 140.00,
                 'purchase_price' => 85.00,
-                'stock'          => 4,  // stock bajo
+                'stock'          => 4,
                 'minimum_stock'  => 8,
                 'location'       => 'Estante B-2',
                 'supplier'       => 'Filtros México SA',
@@ -225,7 +228,7 @@ class SparePartSeeder extends Seeder
                 'unit'           => 'par',
                 'unit_price'     => 750.00,
                 'purchase_price' => 480.00,
-                'stock'          => 2,  // stock crítico — para demo
+                'stock'          => 2,
                 'minimum_stock'  => 4,
                 'location'       => 'Estante D-2',
                 'supplier'       => 'Brembo Distribuciones',
@@ -269,7 +272,7 @@ class SparePartSeeder extends Seeder
                 'unit'           => 'litro',
                 'unit_price'     => 90.00,
                 'purchase_price' => 58.00,
-                'stock'          => 5,  // stock bajo
+                'stock'          => 5,
                 'minimum_stock'  => 10,
                 'location'       => 'Estante E-1',
                 'supplier'       => 'Refacciones Express',
@@ -367,18 +370,27 @@ class SparePartSeeder extends Seeder
             ],
         ];
 
-        foreach ($parts as $partData) {
-            $part = SparePart::create($partData);
+        // Envolver en transacción para garantizar consistencia atómica
+        DB::transaction(function () use ($parts, $adminId) {
+            foreach ($parts as $partData) {
+                // updateOrCreate previene errores por duplicados al reejecutar el seeder
+                $part = SparePart::updateOrCreate(
+                    ['sku' => $partData['sku']],
+                    $partData
+                );
 
-            // Registrar movimiento de inventario inicial
-            InventoryMovement::create([
-                'spare_part_id' => $part->id,
-                'user_id'       => $adminId,
-                'type'          => 'in',
-                'quantity'      => $part->stock,
-                'reason'        => 'Inventario inicial — carga de sistema',
-                'reference'     => 'SEED-' . date('Ym'),
-            ]);
-        }
+                // Registrar movimiento de inventario inicial solo si fue recién creado
+                if ($part->wasRecentlyCreated) {
+                    InventoryMovement::create([
+                        'spare_part_id' => $part->id,
+                        'user_id'       => $adminId,
+                        'type'          => 'in',
+                        'quantity'      => $part->stock,
+                        'reason'        => 'Inventario inicial — carga de sistema',
+                        'reference'     => 'SEED-' . date('Ym'),
+                    ]);
+                }
+            }
+        });
     }
 }

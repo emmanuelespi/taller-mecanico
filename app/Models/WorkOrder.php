@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class WorkOrder extends Model
 {
+    use HasFactory;
     protected $table = 'work_orders';
 
     protected $fillable = [
@@ -65,14 +67,14 @@ class WorkOrder extends Model
     public function services(): BelongsToMany
     {
         return $this->belongsToMany(Service::class, 'work_order_services')
-            ->withPivot('quantity', 'unit_price')
+            ->withPivot(['quantity', 'unit_price'])
             ->withTimestamps();
     }
 
     public function spareParts(): BelongsToMany
     {
         return $this->belongsToMany(SparePart::class, 'work_order_spare_parts')
-            ->withPivot('quantity', 'unit_price')
+            ->withPivot(['quantity', 'unit_price'])
             ->withTimestamps();
     }
 
@@ -125,7 +127,7 @@ class WorkOrder extends Model
 
     public function getFormattedTotalAttribute(): string
     {
-        return '$'.number_format($this->total, 2);
+        return '$' . number_format($this->total, 2);
     }
 
     public function isPending(): bool

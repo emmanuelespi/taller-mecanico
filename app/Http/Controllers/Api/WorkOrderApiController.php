@@ -33,17 +33,6 @@ class WorkOrderApiController extends Controller
         return response()->json($this->workOrderManager->getStatistics());
     }
 
-    public function show($id)
-    {
-        $order = WorkOrder::with(['client', 'vehicle', 'mechanic', 'services', 'spareParts'])->find($id);
-
-        if (!$order) {
-            return response()->json(['message' => 'Orden de trabajo no encontrada'], 400);
-        }
-
-        return response()->json($order);
-    }
-
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -89,7 +78,7 @@ class WorkOrderApiController extends Controller
             return response()->json([
                 'message' => 'Error al cambiar de estado',
                 'error' => $e->getMessage(),
-            ]);
+            ], 422);
         }
     }
 
@@ -102,7 +91,7 @@ class WorkOrderApiController extends Controller
         ]);
 
         try {
-            $this->workOrderManager->addSpareParts(
+            $upatedOrder = $this->workOrderManager->addSpareParts(
                 $order,
                 $request->part_id,
                 $request->quantity,
@@ -117,6 +106,68 @@ class WorkOrderApiController extends Controller
             return response()->json([
                 'message' => 'No se pudo entregar la refacción',
                 'order' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    public function removeSpartPart(WorkOrder $order, int $partId)
+    {
+        try {
+            $this->workOrderManager->removeSparePart($order, $partId);
+
+            return response()->json([
+                'message' => 'Repuesto removido de la orden con éxito',
+                'order' => $order->fresh(['spareParts', 'services'])
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al remover la refacción',
+                'error' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    public function addService(Request $request, WorkOrder $order)
+    {
+        $request->validate([
+            'service_id' => 'required|integer|exists:services,id',
+            'unit_price' => 'required|numeric|min:0',
+            'quantity'   => 'nullable|integer|min:1'
+        ]);
+
+        try {
+            $this->workOrderManager->addService(
+                $order,
+                $request->service_id,
+                $request->unit_price,
+                $request->get('quantity', 1)
+            );
+
+            return response()->json([
+                'message' => 'Servicio agregado con éxito',
+                'order'   => $order->fresh(['spareParts', 'services'])
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'No se pudo agregar el servicio',
+                'error'   => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    public function removeService(WorkOrder $order, int $serviceId)
+    {
+        try {
+            $this->workOrderManager->removeService($order, $serviceId);
+
+            return response()->json([
+                'message' => 'Servicio removido con éxito',
+                'order'   => $order->fresh(['spareParts', 'services'])
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error al remover el servicio',
+                'error'   => $e->getMessage()
             ], 422);
         }
     }

@@ -110,7 +110,6 @@ class WorkOrderForm extends Component
         }
 
         $this->open = true;
-
     }
 
     public function updatedClientId()
@@ -131,7 +130,7 @@ class WorkOrderForm extends Component
 
         $service = Service::findOrFail($this->selectedServiceId);
 
-        $existingKey = collect($this->services)->search(fn ($item) => $item['id'] == $service->id);
+        $existingKey = collect($this->services)->search(fn($item) => $item['id'] == $service->id);
 
         if ($existingKey !== false) {
             $this->services[$existingKey]['quantity'] += $this->selectedServiceQuantity;
@@ -177,7 +176,7 @@ class WorkOrderForm extends Component
             return;
         }
 
-        $existingKey = collect($this->spareParts)->search(fn ($item) => $item['id'] == $part->id);
+        $existingKey = collect($this->spareParts)->search(fn($item) => $item['id'] == $part->id);
 
         if ($existingKey !== false) {
             $newQuantity = $this->spareParts[$existingKey]['quantity'] + $this->selectedSparePartQuantity;
@@ -265,6 +264,7 @@ class WorkOrderForm extends Component
             $order->services()->attach($service['id'], [
                 'quantity' => $service['quantity'],
                 'unit_price' => $service['unit_price'],
+                'subtotal' => $service['total'],
             ]);
         }
 
@@ -272,6 +272,7 @@ class WorkOrderForm extends Component
             $order->spareParts()->attach($part['id'], [
                 'quantity' => $part['quantity'],
                 'unit_price' => $part['unit_price'],
+                'subtotal' => $part['total'],
             ]);
         }
 

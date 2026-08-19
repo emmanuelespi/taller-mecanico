@@ -19,6 +19,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{id}', [WorkOrderApiController::class, 'show']);
         Route::patch('/{order}/status', [WorkOrderApiController::class, 'changeStatus']);
         Route::post('/{order}/spare-parts', [WorkOrderApiController::class, 'addSparePart']);
+        Route::delete('/{order}/spare-parts/{partId}', [WorkOrderApiController::class, 'removeSparePart']);
+        Route::post('/{order}/services', [WorkOrderApiController::class, 'addService']);
+        Route::delete('/{order}/services/{serviceId}', [WorkOrderApiController::class,'removeService']);
+
     });
 
     Route::prefix('vehicles')->group(function () {
