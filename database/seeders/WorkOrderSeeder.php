@@ -10,6 +10,7 @@ use App\Models\Vehicle;
 use App\Models\WorkOrder;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
 
 class WorkOrderSeeder extends Seeder
 {
@@ -18,7 +19,7 @@ class WorkOrderSeeder extends Seeder
         $admin       = User::where('role', 'admin')->first();
         $mechanics   = User::where('role', 'mecanico')->where('is_active', true)->get();
         $vehicles    = Vehicle::with('client')->get();
-        $services    = Service::where('active', true)->get()->keyBy('name');
+        $services    = Service::where('active', true)->get()->unique('name')->keyBy('name');
         $parts       = SparePart::where('is_active', true)->get()->keyBy('sku');
 
         // Helper para generar número de orden
@@ -43,7 +44,7 @@ class WorkOrderSeeder extends Seeder
             'mechanic'           => $mechanics[0],
             'created_by'         => $admin,
             'status'             => 'delivered',
-            'problem_description'=> 'Cliente reporta motor con tirones y consumo de combustible elevado.',
+            'problem_description' => 'Cliente reporta motor con tirones y consumo de combustible elevado.',
             'diagnosis'          => 'Bujías desgastadas y filtro de aire saturado. Se realiza afinación menor.',
             'observations'       => 'Se recomienda cambio de correa de distribución en próxima visita (km 85,000).',
             'payment_status'     => 'paid',
@@ -68,7 +69,7 @@ class WorkOrderSeeder extends Seeder
             'mechanic'           => $mechanics[1],
             'created_by'         => $admin,
             'status'             => 'delivered',
-            'problem_description'=> 'Frenos hacen ruido al frenar, pedal esponjoso.',
+            'problem_description' => 'Frenos hacen ruido al frenar, pedal esponjoso.',
             'diagnosis'          => 'Pastillas delanteras muy desgastadas y líquido de frenos contaminado.',
             'observations'       => 'Discos en buen estado, se limpian y lubrican calibradores.',
             'payment_status'     => 'paid',
@@ -93,7 +94,7 @@ class WorkOrderSeeder extends Seeder
             'mechanic'           => $mechanics[2],
             'created_by'         => $admin,
             'status'             => 'delivered',
-            'problem_description'=> 'Luz de check engine encendida, motor con vibración en ralentí.',
+            'problem_description' => 'Luz de check engine encendida, motor con vibración en ralentí.',
             'diagnosis'          => 'Código P0301: fallo de encendido en cilindro 1. Bujías desgastadas e inyector sucio.',
             'observations'       => 'Se realiza afinación mayor completa. Vehículo entregado sin fallos.',
             'payment_status'     => 'paid',
@@ -122,7 +123,7 @@ class WorkOrderSeeder extends Seeder
             'mechanic'           => $mechanics[0],
             'created_by'         => $admin,
             'status'             => 'delivered',
-            'problem_description'=> 'Servicio de mantenimiento preventivo de 10,000 km.',
+            'problem_description' => 'Servicio de mantenimiento preventivo de 10,000 km.',
             'diagnosis'          => 'Vehículo en buen estado general. Se realiza cambio de aceite y filtros.',
             'observations'       => null,
             'payment_status'     => 'paid',
@@ -146,7 +147,7 @@ class WorkOrderSeeder extends Seeder
             'mechanic'           => $mechanics[1],
             'created_by'         => $admin,
             'status'             => 'delivered',
-            'problem_description'=> 'Vehículo recalentando. Indicador de temperatura llega al máximo.',
+            'problem_description' => 'Vehículo recalentando. Indicador de temperatura llega al máximo.',
             'diagnosis'          => 'Termostato atascado en posición cerrada. Mangueras en buen estado.',
             'observations'       => 'Se recomienda revisar tapa de radiador en próximo servicio.',
             'payment_status'     => 'paid',
@@ -169,7 +170,7 @@ class WorkOrderSeeder extends Seeder
             'mechanic'           => $mechanics[2],
             'created_by'         => $admin,
             'status'             => 'delivered',
-            'problem_description'=> 'Vibración fuerte en volante a alta velocidad y ruido en suspensión delantera.',
+            'problem_description' => 'Vibración fuerte en volante a alta velocidad y ruido en suspensión delantera.',
             'diagnosis'          => 'Amortiguadores delanteros vencidos. Rueda delantera izquierda desbalanceada.',
             'observations'       => 'Se realiza alineación y balanceo completo tras cambio de amortiguadores.',
             'payment_status'     => 'paid',
@@ -191,7 +192,7 @@ class WorkOrderSeeder extends Seeder
             'mechanic'           => $mechanics[0],
             'created_by'         => $admin,
             'status'             => 'delivered',
-            'problem_description'=> 'Batería descargada, vehículo no enciende.',
+            'problem_description' => 'Batería descargada, vehículo no enciende.',
             'diagnosis'          => 'Batería agotada (3 años de uso). Alternador en perfecto estado.',
             'observations'       => null,
             'payment_status'     => 'paid',
@@ -218,7 +219,7 @@ class WorkOrderSeeder extends Seeder
             'mechanic'           => $mechanics[1],
             'created_by'         => $admin,
             'status'             => 'completed',
-            'problem_description'=> 'Servicio de afinación mayor programado a 60,000 km.',
+            'problem_description' => 'Servicio de afinación mayor programado a 60,000 km.',
             'diagnosis'          => 'Bujías con desgaste, filtros saturados. Correa de distribución en límite de vida útil.',
             'observations'       => 'Se cambia correa de distribución preventivamente. Vehículo listo para entrega.',
             'payment_status'     => 'pending',
@@ -229,7 +230,7 @@ class WorkOrderSeeder extends Seeder
             'delivered_at'       => null,
             'services_list'      => [
                 ['name' => 'Afinación Mayor Gasolina',       'qty' => 1],
-                ['name' => 'Cambio de Correa de Distribución','qty' => 1],
+                ['name' => 'Cambio de Correa de Distribución', 'qty' => 1],
             ],
             'parts_list'         => [
                 ['sku' => 'BUJ-BSH-PT4',  'qty' => 1],
@@ -246,7 +247,7 @@ class WorkOrderSeeder extends Seeder
             'mechanic'           => $mechanics[2],
             'created_by'         => $admin,
             'status'             => 'completed',
-            'problem_description'=> 'Cambio de pastillas y revisión general de frenos.',
+            'problem_description' => 'Cambio de pastillas y revisión general de frenos.',
             'diagnosis'          => 'Pastillas traseras al límite. Delanteras al 40%. Se cambian traseras y limpian calibradores.',
             'observations'       => 'Discos en buenas condiciones. Próximo cambio de pastillas delanteras en ~15,000 km.',
             'payment_status'     => 'paid',
@@ -274,7 +275,7 @@ class WorkOrderSeeder extends Seeder
             'mechanic'           => $mechanics[0],
             'created_by'         => $admin,
             'status'             => 'in_progress',
-            'problem_description'=> 'Ruido metálico al acelerar desde bajo régimen. Posible falla en distribución.',
+            'problem_description' => 'Ruido metálico al acelerar desde bajo régimen. Posible falla en distribución.',
             'diagnosis'          => 'Se detecta holgura en cadena de distribución. En revisión.',
             'observations'       => null,
             'payment_status'     => 'pending',
@@ -295,7 +296,7 @@ class WorkOrderSeeder extends Seeder
             'mechanic'           => $mechanics[1],
             'created_by'         => $admin,
             'status'             => 'in_progress',
-            'problem_description'=> 'Servicio completo de frenos y cambio de aceite.',
+            'problem_description' => 'Servicio completo de frenos y cambio de aceite.',
             'diagnosis'          => 'Frenos delanteros y traseros al límite. Aceite muy oscuro y contaminado.',
             'observations'       => null,
             'payment_status'     => 'pending',
@@ -323,7 +324,7 @@ class WorkOrderSeeder extends Seeder
             'mechanic'           => $mechanics[2],
             'created_by'         => $admin,
             'status'             => 'in_progress',
-            'problem_description'=> 'Vehículo no arranca a la primera, embrague duro.',
+            'problem_description' => 'Vehículo no arranca a la primera, embrague duro.',
             'diagnosis'          => 'Kit de clutch desgastado. Motor de arranque débil, batería en proceso de verificación.',
             'observations'       => null,
             'payment_status'     => 'pending',
@@ -349,7 +350,7 @@ class WorkOrderSeeder extends Seeder
             'mechanic'           => null, // sin mecánico asignado aún
             'created_by'         => $admin,
             'status'             => 'pending',
-            'problem_description'=> 'Mantenimiento preventivo 20,000 km. Cambio de aceite, filtros y revisión general.',
+            'problem_description' => 'Mantenimiento preventivo 20,000 km. Cambio de aceite, filtros y revisión general.',
             'diagnosis'          => null,
             'observations'       => null,
             'payment_status'     => 'pending',
@@ -364,7 +365,7 @@ class WorkOrderSeeder extends Seeder
             'parts_list'         => [
                 ['sku' => 'ACE-5W30-1L', 'qty' => 4],
                 ['sku' => 'FIL-ACE-TN',  'qty' => 1],
-                ['sku' => 'FIL-AIRE-GEN','qty' => 1],
+                ['sku' => 'FIL-AIRE-GEN', 'qty' => 1],
             ],
         ], $services, $parts);
 
@@ -374,7 +375,7 @@ class WorkOrderSeeder extends Seeder
             'mechanic'           => $mechanics[0],
             'created_by'         => $admin,
             'status'             => 'pending',
-            'problem_description'=> 'Luz de ABS encendida en tablero. Frenos responden pero con pulsación.',
+            'problem_description' => 'Luz de ABS encendida en tablero. Frenos responden pero con pulsación.',
             'diagnosis'          => null,
             'observations'       => null,
             'payment_status'     => 'pending',
@@ -396,7 +397,7 @@ class WorkOrderSeeder extends Seeder
             'mechanic'           => null,
             'created_by'         => $admin,
             'status'             => 'pending',
-            'problem_description'=> 'Dirección hidráulica hace ruido al girar y hay pérdida de fluido.',
+            'problem_description' => 'Dirección hidráulica hace ruido al girar y hay pérdida de fluido.',
             'diagnosis'          => null,
             'observations'       => null,
             'payment_status'     => 'pending',
@@ -440,10 +441,17 @@ class WorkOrderSeeder extends Seeder
         // Adjuntar servicios
         foreach ($data['services_list'] as $s) {
             $service = $services->get($s['name']);
+
+            if ($service instanceof Collection) {
+                $service = $service->first();
+                # code...
+            }
             if ($service) {
+                $unitPrice = $service->price ?? $service->unit_price ?? 0;
                 $order->services()->attach($service->id, [
                     'quantity'   => $s['qty'],
-                    'unit_price' => $service->price,
+                    'unit_price' => $unitPrice,
+                    'subtotal' => $s['qty'] * $unitPrice,
                 ]);
             }
         }
@@ -451,10 +459,15 @@ class WorkOrderSeeder extends Seeder
         // Adjuntar repuestos (sin descontar stock en seed — ya descontado en estados finales)
         foreach ($data['parts_list'] as $p) {
             $part = $parts->get($p['sku']);
+            if ($part instanceof Collection) {
+                $part = $part->first();
+            }
             if ($part) {
+                $unitPrice = $part->unit_price ?? $part->price ?? 0;
                 $order->spareParts()->attach($part->id, [
                     'quantity'   => $p['qty'],
-                    'unit_price' => $part->unit_price,
+                    'unit_price' => $unitPrice,
+                    'subtotal' => $p['qty'] * $unitPrice,
                 ]);
             }
         }
