@@ -18,10 +18,9 @@ RUN composer install --no-dev --optimize-autoloader
 RUN npm install
 RUN npm run build
 
-# 4. Crear archivo sqlite si no existe y dar permisos absolutos 777 a todo database y storage
-RUN touch database/database.sqlite || true
+# 4. Permisos
 RUN chown -R www-data:www-data /var/www
-RUN chmod -R 777 /var/www/storage /var/www/bootstrap/cache /var/www/database
+RUN chmod -R 777 /var/www/storage /var/www/bootstrap/cache
 
 # 5. Configuración Nginx
 RUN echo 'server { \
@@ -41,12 +40,8 @@ RUN echo 'server { \
 
 EXPOSE 10000
 
-
-# Script de inicio corregido
+# 6. Script de inicio limpio y directo
 CMD php artisan config:clear && \
-    php artisan route:clear && \
-    php artisan view:clear && \
-    php artisan cache:clear || true && \
     php artisan migrate --force && \
     php artisan db:seed --force && \
     php artisan config:cache && \
