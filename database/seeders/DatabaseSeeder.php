@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Deshabilitar foreign key checks para permitir truncar tablas
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         $this->call([
             UserSeeder::class,
