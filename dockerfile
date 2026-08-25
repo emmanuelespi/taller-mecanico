@@ -24,24 +24,28 @@ RUN npm run build
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache
 
-# 7. Configuración rápida de Nginx para el puerto de Render
+# 7. Configuración de Nginx en puerto 10000
 RUN echo 'server { \
     listen 10000; \
     index index.php index.html; \
     root /var/www/public; \
     location / { \
-        try_files $uri $uri/ /index.php?$query_string; \
+    try_files $uri $uri/ /index.php?$query_string; \
     } \
     location ~ \.php$ { \
-        fastcgi_pass 127.0.0.1:9000; \
-        fastcgi_index index.php; \
-        include fastcgi_params; \
-        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name; \
+    fastcgi_pass 127.0.0.1:9000; \
+    fastcgi_index index.php; \
+    include fastcgi_params; \
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name; \
     } \
-}' > /etc/nginx/sites-available/default
+    }' > /etc/nginx/sites-available/default
 
-# 8. Script de inicio: ejecuta migraciones y levanta PHP-FPM + Nginx
-CMD php artisan config:cache && \
+# Exponer el puerto 10000 para Render
+EXPOSE 10000
+
+# 8. Script de inicio
+CMD php artisan storage:link || true && \
+    php artisan config:cache && \
     php artisan route:cache && \
     php artisan view:cache && \
     php artisan migrate --force && \
