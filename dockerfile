@@ -1,6 +1,6 @@
 FROM php:8.2-fpm
 
-# 1. Instalar dependencias
+# 1. Dependencias del sistema
 RUN apt-get update && apt-get install -y \
     git curl libpng-dev libonig-dev libxml2-dev libzip-dev zip unzip nginx \
     libpq-dev nodejs npm \
@@ -13,16 +13,17 @@ WORKDIR /var/www
 
 COPY . .
 
-# 3. Dependencias de PHP y JS
+# 3. Instalación de paquetes
 RUN composer install --no-dev --optimize-autoloader
 RUN npm install
 RUN npm run build
 
-# 4. Asignar permisos correctos al usuario del servidor web
+# 4. Crear archivo sqlite si no existe y dar permisos absolutos 777 a todo database y storage
+RUN touch database/database.sqlite || true
 RUN chown -R www-data:www-data /var/www
-RUN chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+RUN chmod -R 777 /var/www/storage /var/www/bootstrap/cache /var/www/database
 
-# 5. Configuración de Nginx en puerto 10000
+# 5. Configuración Nginx
 RUN echo 'server { \
     listen 10000; \
     index index.php index.html; \
@@ -40,9 +41,12 @@ RUN echo 'server { \
 
 EXPOSE 10000
 
-# 6. Script de inicio
-CMD php artisan storage:link || true && \
-    php artisan config:clear && \
+# 6. Inicio: Limpiar cachés viejas antes de regenerar
+CMD php artisan config:clear && \
+    php artisan cache:clear && \
+    php artisan view:clear && \
+    php artisan route:clear && \
+    php artisan storage:link || true && \
     php artisan config:cache && \
     php artisan route:cache && \
     php artisan view:cache && \
