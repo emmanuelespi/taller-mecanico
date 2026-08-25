@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Vehicle;
 use App\Services\VehicleService;
 use Illuminate\Http\Request;
 
@@ -70,5 +71,54 @@ class VehicleApiController extends Controller
                 'error' => $e->getMessage()
             ], 422);
         }
+    }
+
+    public function show(int $id)
+    {
+
+        $vehicle = Vehicle::find($id);
+
+        if (!$vehicle) {
+            return response()->json(['message' => 'Vehiculo no encontrado'], 404);
+        }
+
+        $vehicle->load(['client', 'workOrders' => function ($q) {
+            $q->latest();
+        }]);
+
+        $vehicle->has_active_orders = $this->vehicleService->hasActiveWorkOrders($vehicle);
+
+        return response()->json($vehicle);
+    }
+
+    public function update(Request $request, int $id)
+    {
+        $vehicle = Vehicle::find($id);
+
+        if (!$vehicle) {
+            return response()->json(['message' => 'Vehículo no encontrado'], 404);
+        }
+
+        $validated = $request->validate([
+            'plate' => 'sometimes|string|max:20',
+            'brand' => 'sometimes|string|max:50',
+            'model' => 'sometimes|string|max:50',
+            'year'  => 'sometimes|nullable|integer',
+            'color' => 'sometimes|nullable|string|max:30',
+        ]);
+
+        $vehicle->update($validated);
+
+        // 🔍 SE AGREGA 'workOrders' Y 'has_active_orders' AL RETORNAR
+        $vehicle->load(['client', 'workOrders' => function ($q) {
+            $q->latest();
+        }]);
+
+        $vehicle->has_active_orders = $this->vehicleService->hasActiveWorkOrders($vehicle);
+
+        return response()->json([
+            'message' => 'Vehículo actualizado correctamente',
+            'vehicle' => $vehicle
+        ]);
     }
 }

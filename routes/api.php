@@ -21,13 +21,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/{order}/spare-parts', [WorkOrderApiController::class, 'addSparePart']);
         Route::delete('/{order}/spare-parts/{partId}', [WorkOrderApiController::class, 'removeSparePart']);
         Route::post('/{order}/services', [WorkOrderApiController::class, 'addService']);
-        Route::delete('/{order}/services/{serviceId}', [WorkOrderApiController::class,'removeService']);
-
+        Route::delete('/{order}/services/{serviceId}', [WorkOrderApiController::class, 'removeService']);
     });
 
     Route::prefix('vehicles')->group(function () {
         Route::get('/', [VehicleApiController::class, 'index']);
         Route::post('/', [VehicleApiController::class, 'store']);
+        Route::get('/{id}', [VehicleApiController::class, 'show']);
+        Route::get('/{id}', [VehicleApiController::class, 'update']);
         Route::get('plate/{plate}', [VehicleApiController::class, 'showByPlate']);
         Route::get('/client/{clientId}', [VehicleApiController::class, 'getByClient']);
     });
