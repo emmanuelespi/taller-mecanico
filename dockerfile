@@ -42,14 +42,15 @@ RUN echo 'server { \
 EXPOSE 10000
 
 # 6. Inicio: Limpiar cachés viejas antes de regenerar
-CMD php artisan config:clear && \
+CMD php artisan storage:link || true && \
+    php artisan config:clear && \
     php artisan cache:clear && \
     php artisan view:clear && \
     php artisan route:clear && \
-    php artisan storage:link || true && \
     php artisan config:cache && \
     php artisan route:cache && \
     php artisan view:cache && \
     php artisan migrate --force && \
+    php artisan db:seed --force && \
     php-fpm -D && \
     nginx -g 'daemon off;'
