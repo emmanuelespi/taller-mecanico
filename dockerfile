@@ -41,12 +41,11 @@ RUN echo 'server { \
 
 EXPOSE 10000
 
-# 6. Inicio: Limpiar cachés viejas antes de regenerar
-CMD php artisan storage:link || true && \
-    php artisan config:clear && \
-    php artisan cache:clear && \
-    php artisan view:clear && \
+
+# Script de inicio seguro para el entorno de producción
+CMD php artisan config:clear && \
     php artisan route:clear && \
+    php artisan view:clear && \
     php artisan config:cache && \
     php artisan route:cache && \
     php artisan view:cache && \
