@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class DatabaseSeeder extends Seeder
 {
@@ -21,7 +22,8 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Deshabilitar foreign key checks para permitir truncar tablas
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        //DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        Schema::disableForeignKeyConstraints();
 
         $this->call([
             UserSeeder::class,
@@ -48,6 +50,7 @@ class DatabaseSeeder extends Seeder
             \Illuminate\Support\Facades\Notification::send($recepcionists, new \App\Notifications\OrderCompletedNotification($completedOrder));
         }
 
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        //DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        Schema::enableForeignKeyConstraints();
     }
 }
