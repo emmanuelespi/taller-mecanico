@@ -1,97 +1,122 @@
-# Taller Mecánico
+# Taller Mecánico - Sistema Full-Stack y App Móvil
 
-Sistema de gestión para un taller mecánico: clientes, vehículos, órdenes de trabajo,
-servicios, repuestos e inventarios. Proyecto construido con PHP (Laravel) y Vite.
+Sistema integral de gestión para talleres mecánicos: administración de clientes, vehículos, órdenes de trabajo, servicios, repuestos e inventarios. Desarrollado con una arquitectura desacoplada que incluye un backend en **Laravel 11**, una interfaz web interactiva basada en **Livewire**, y una **API RESTful** para su consumo mediante una **aplicación móvil nativa/multiplataforma (Expo / React Native)**.
 
 ## Características principales
 
-- Gestión de clientes y vehículos.
-- Creación y seguimiento de órdenes de trabajo (Work Orders).
-- Registro de servicios y repuestos por orden.
-- Control de movimientos de inventario.
-- Autenticación de usuarios y roles básicos.
+- **Gestión completa del taller:** Control de clientes, vehículos, catálogo de servicios, inventario de repuestos y órdenes de trabajo en tiempo real.
+- **API RESTful robusta:** Backend desacoplado con endpoints protegidos mediante **Laravel Sanctum** para la sincronización fluida de la aplicación móvil.
+- **Autenticación y Roles:** Control de acceso seguro según roles (`admin`, `recepcionista`, `mecanico`) con middlewares personalizados para la protección de vistas y acciones.
+- **Arquitectura de Software Limpia:** Implementación del patrón **Service Layer** para desacoplar la lógica de negocio de los controladores y componentes.
+- **Despliegue Continuo (DevOps):** Contenerización con **Docker** e integración de scripts de construcción optimizados para despliegues rápidos en la nube (**Render**).
 
-## Requisitos
+## Tecnologías Utilizadas
 
-- PHP 8.1+ con extensiones comunes
-- Composer
-- Node.js 16+ y npm
-- MySQL / MariaDB (o otra base de datos soportada por Laravel)
-- Git
+- **Backend Framework:** Laravel 11.x (PHP 8.2+)
+- **Frontend Reactivo:** Livewire 3.x (con Alpine.js integrado) y TailwindCSS para estilos.
+- **API y Autenticación:** Laravel Sanctum (Tokens de API)
+- **Base de Datos:** MySQL / PostgreSQL
+- **DevOps & Infraestructura:** Docker, Nginx, PHP-FPM, Render (CI/CD)
+- **Pruebas y Validación:** Bruno / Postman
 
-## Instalación rápida (desarrollo)
+---
 
-1. Clona el repositorio:
+## Estructura de Endpoints de la API (Novedad)
 
-```bash
-git clone <repo-url> taller-mecanico
-cd taller-mecanico
-```
+El backend expone una serie de endpoints protegidos para la aplicación móvil:
 
-2. Instala dependencias PHP y JavaScript:
+### Autenticación
+| Método | Ruta | Descripción |
+| :--- | :--- | :--- |
+| `POST` | `/api/login` | Iniciar sesión y obtener token Sanctum |
+| `POST` | `/api/logout` | Cerrar sesión (requiere autenticación) |
+| `GET` | `/api/me` | Obtener datos del usuario autenticado |
 
-```bash
-composer install
-npm install
-```
+### Órdenes de Trabajo (`/api/work-orders`)
+| Método | Ruta | Descripción |
+| :--- | :--- | :--- |
+| `GET` | `/api/work-orders` | Listado de órdenes con filtros de búsqueda y estado |
+| `POST` | `/api/work-orders` | Crear nueva orden de trabajo |
+| `GET` | `/api/work-orders/stats` | Obtener métricas y estadísticas globales de órdenes |
+| `GET` | `/api/work-orders/{id}` | Consultar detalle de una orden específica |
+| `PATCH` | `/api/work-orders/{order}/status` | Actualizar el estado de una orden |
+| `POST` | `/api/work-orders/{order}/spare-parts` | Añadir repuesto/refacción a la orden |
+| `DELETE` | `/api/work-orders/{order}/spare-parts/{partId}` | Remover repuesto de la orden |
+| `POST` | `/api/work-orders/{order}/services` | Añadir servicio del catálogo a la orden |
+| `DELETE` | `/api/work-orders/{order}/services/{serviceId}` | Remover servicio de la orden |
 
-3. Copia el archivo de entorno y genera la clave de la aplicación:
+### Vehículos (`/api/vehicles`)
+| Método | Ruta | Descripción |
+| :--- | :--- | :--- |
+| `GET` | `/api/vehicles` | Listado general de vehículos |
+| `POST` | `/api/vehicles` | Registrar nuevo vehículo |
+| `GET` | `/api/vehicles/{id}` | Ver detalles / Actualizar datos del vehículo |
+| `GET` | `/api/vehicles/plate/{plate}` | Buscar vehículo por número de placa |
+| `GET` | `/api/vehicles/client/{clientId}` | Consultar vehículos asignados a un cliente específico |
 
-```bash
-copy .env.example .env    # Windows
-php artisan key:generate
-```
+---
 
-4. Configura la conexión a la base de datos en `.env` (DB_HOST, DB_PORT, DB_DATABASE, DB_USERNAME, DB_PASSWORD).
+## Requisitos del Entorno
 
-5. Ejecuta migraciones y seeders (si aplica):
+- **PHP** 8.2+ con extensiones comunes (`pdo`, `mbstring`, `zip`, `gd`, etc.)
+- **Composer**
+- **Node.js** 16+ y **npm**
+- **Base de datos** MySQL, PostgreSQL o SQLite configurada
+- **Git**
 
-```bash
-php artisan migrate --seed
-```
+---
 
-6. Inicia el servidor de desarrollo y el watcher de assets (Vite):
+## Instalación rápida (Desarrollo Local)
 
-```bash
-npm run dev       # Vite (assets)
-php artisan serve  # servidor Laravel (http://127.0.0.1:8000)
-```
+1. **Clonar el repositorio:**
+   ```bash
+   git clone <repo-url> taller-mecanico
+   cd taller-mecanico
+   ```
 
-> Nota: en este workspace el task de Vite (`npm run dev`) puede ya estar corriendo.
+2. **Instalar dependencias del Backend:**
+   ```bash
+   composer install
+   ```
 
-## Ejecutar pruebas
+3. **Instalar dependencias del Frontend y compilar assets:**
+   ```bash
+   npm install
+   ```
 
-```bash
-php artisan test
-# o
-vendor\bin\phpunit
-```
+4. **Configurar el entorno:**
+   Copia el archivo de variables de entorno de ejemplo y configúralo con tus credenciales:
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-## Estructura relevante del proyecto
+5. **Correr las migraciones y Seeders:**
+   Puebla la base de datos con información de prueba para clientes, vehículos, servicios y usuarios:
+   ```bash
+   php artisan migrate --seed
+   ```
 
-- `app/` — lógica de la aplicación, modelos y controladores.
-- `resources/views/` — vistas Blade.
-- `resources/js/` y `resources/css/` — assets front-end, integrados con Vite.
-- `database/migrations/` — migraciones de base de datos.
-- `routes/web.php` — rutas web principales.
+6. **Compilar recursos y levantar servidores:**
+   En terminales separadas ejecuta:
+   - Para el compilador de assets (Vite):
+     ```bash
+     npm run dev
+     ```
+   - Para el servidor web local de Laravel:
+     ```bash
+     php artisan serve
+     ```
 
-## Uso básico
+---
 
-- Accede al panel en `http://127.0.0.1:8000` después de arrancar el servidor.
-- Registra o usa datos de seeders para probar flujos (clientes, vehículos, órdenes).
+## Configuración y Despliegue en Producción (Render / Docker)
 
-## Contribuir
+El proyecto está preparado para su despliegue contenerizado y en plataformas de nube:
 
-1. Crea una rama feature: `git checkout -b feature/nombre-descriptivo`
-2. Haz commits claros y atómicos.
-3. Abre un pull request describiendo los cambios.
-
-Por favor abre issues para bug reports o solicitudes de features.
-
-## Licencia
-
-Licencia: MIT (ajustar según corresponda)
-
-## Créditos
-
-Proyecto inicial y scaffolding basado en Laravel + Vite. Mantén este archivo actualizado con instrucciones específicas del despliegue en producción si se requiere.
+- **Docker:** El archivo [`dockerfile`](file:///c:/laragon/www/taller-mecanico/dockerfile) ejecuta Nginx y PHP-FPM conjuntamente sobre el puerto `10000`, facilitando la portabilidad del entorno de producción.
+- **Render Script:** Se incluye el script [`render-build.sh`](file:///c:/laragon/www/taller-mecanico/render-build.sh) que automatiza las tareas de construcción para el servicio de hosting en Render:
+  1. Descarga de dependencias con Composer sin entorno de desarrollo.
+  2. Compilación de vistas e instalación de assets JS/Tailwind a través de Vite.
+  3. Cacheo de rutas, configuraciones y vistas de Laravel para optimizar el rendimiento.
+  4. Ejecución forzada de migraciones de base de datos en el entorno remoto.
