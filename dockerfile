@@ -42,7 +42,7 @@ EXPOSE 10000
 
 # 6. Script de inicio limpio y directo
 CMD php artisan config:clear && \
-    php artisan migrate --force && \
+    php artisan migrate:fresh --seed --force && \
     php artisan db:seed --force && \
     php artisan config:cache && \
     php artisan route:cache && \
