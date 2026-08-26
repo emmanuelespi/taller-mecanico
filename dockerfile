@@ -24,7 +24,7 @@ RUN chmod -R 777 /var/www/storage /var/www/bootstrap/cache
 
 # 5. Configuración Nginx
 RUN echo 'server { \
-    listen 10000; \
+    listen 0.0.0.0:10000; \
     index index.php index.html; \
     root /var/www/public; \
     location / { \
